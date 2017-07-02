@@ -1,0 +1,13 @@
+#
+# A Build Docker Image for Compiling Go Binary
+#
+# Please set the WORKDIR and volume to build
+# Example:
+#     docker run --rm -v "${PWD}/app":${WORKDIR} -w ${WORKDIR} -f Dockerfile.build .
+#
+#
+FROM golang:1.7.1
+
+COPY . .
+
+RUN make build-go
