@@ -1,2 +1,2 @@
-# go-api-gateway
-API gateway written in go lang
+# go-hello
+A hello service - newtonsystems go microservice 
