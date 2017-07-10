@@ -4,8 +4,10 @@
 # Created originally by cookiecutter: version X
 #
 
-REPO=go-hello
-PROJECT_NAME=hello
+REPO=go-api-gateway
+PROJECT_NAME=apt-gateway
+CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+CURRENT_RELEASE_VERSION=0.0.1
 
 TIMESTAMP=tmp-$(shell date +%s )
 
@@ -20,9 +22,9 @@ WHITE  := $(shell tput -Txterm setaf 7)
 YELLOW := $(shell tput -Txterm setaf 3)
 RESET  := $(shell tput -Txterm sgr0)
 
-INFO=$(GREEN)====>>[INFO]$(RESET)
-ERROR=$(RED)====>>[ERROR]$(RESET)
-WARN=$(YELLOW)====>>[WARN]$(RESET)
+INFO=$(GREEN)[INFO] $(RESET)
+ERROR=$(RED)[ERROR] $(RESET)
+WARN=$(YELLOW)[WARN] $(RESET)
 
 # Add help text after each target name starting with '\#\#'
 # A category can be added with @category
@@ -100,29 +102,132 @@ help-how-to:                 ##@other Shows some useful answers to frequent ques
 	@echo "\tYou can ignore the Prerequisites by setting FORCE_IGNORE_PREQ_TEST: make <command> FORCE_IGNORE_PREQ_TEST=true"
 	@echo ""
 
-export WORKDIR=/Users/danvir/go/src/go-hello/app
+
+#
+# Go Dependencies commands
+#
+
+update-deps-featuretest:
+	@echo "$(INFO) Updating dependencies for featuretest environment"
+	cp featuretest.yaml glide.lock
+	glide -y featuretest.yaml update
+	cp glide.lock featuretest.lock
+
+update-deps-master:
+	@echo "$(INFO) Updating dependencies for $(BLUE)master$(RESET) environment"
+	cp master.yaml glide.lock
+	glide -y master.yaml update
+	cp glide.lock master.lock
+
+install-deps-featuretest:
+	@echo "$(INFO) Installing dependencies for featuretest environment"
+	cp featuretest.lock glide.lock
+	glide -y featuretest.yaml install
+	cp glide.lock featuretest.lock
+
+install-deps-master:
+	@echo "$(INFO) Installing dependencies for $(BLUE)master$(RESET) environment"
+	cp master.lock glide.lock
+	glide -y master.yaml install
+	cp glide.lock master.lock
+
 
 #
 # Main
 #
-build-go:
+
+compile:
 	@echo "$(INFO) Getting packages and building alpine go binary ..."
-	go get ./...
-	CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -a -installsuffix cgo -o main ./app 
+	make update-deps-$(CURRENT_BRANCH)
+	make install-deps-$(CURRENT_BRANCH)
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./app/cmd/addsvc/main.go
 
-build:                       ##@local Builds the local Dockerfile
-	@echo "$(INFO) Building a linux-alpine Go binary locally"
-	docker run --rm -v "${PWD}/app":${WORKDIR} -w ${WORKDIR} -f Dockerfile.build .
-	#cd app/ && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o main
-	@echo ""
-	#chmod +x app/main
-	@echo "$(INFO) Building docker container locally with tag: $(BLUE)$(REPO):local$(RESET)"
-	#docker image build -t $(REPO):local -f Dockerfile .
+# TODO: Should speed this up with voluming vendor/
+build-exec:        ##@build Cross compile the go binary executable
+	@echo "$(INFO) Building a linux-alpine Go binary locally with a docker container $(BLUE)$(REPO):compile$(RESET)"
+	docker build -t $(REPO):compile -f Dockerfile.build .
+	docker run --rm -v "${PWD}":/go/src/github.com/newtonsystems/go-api-gateway $(REPO):compile
 	@echo ""
 
-run: build                   ##@local Builds and run docker container with tag: '$(REPO):local' as a one-off. ##@local (dev-workflow-2) Runs docker container on same network as minikube making it accessible from kubernetes minikube and other kubernetes services
+
+#
+# Run Commands
+#
+.PHONY: build run build-dev run-dev
+
+build:                  ##@run Builds and run docker con
+	docker build -t $(REPO):local .
+
+run: build              ##@run Builds and run docker container with tag: '$(REPO):local' as a one-off.
 	@echo "$(INFO) Running docker container with tag: $(REPO):local"
 	@echo "$(BLUE)"
-	docker run $(REPO):local
+	@echo "$(INFO) Building docker container locally with tag: $(BLUE)$(REPO):local$(RESET)"
+
+	docker run -it $(REPO):local
 	@echo "$(NO_COLOR)"
 
+build-dev:
+	docker build -t $(REPO):dev -f Dockerfile.dev .
+
+run-dev:    ##@dev Build and run (hot-reload) development docker container (Normally run this for dev changes)
+	@echo ""
+	docker run -v "${PWD}":/go/src/github.com/newtonsystems/go-api-gateway  -it $(REPO):dev
+
+
+
+
+PID      = /tmp/awesome-golang-project.pid
+GO_FILES = $(wildcard *.go)
+APP      = ./main
+
+serve: restart
+	inotifywait -r -m . -e create -e modify | \
+		while read path action file; do \
+			echo "changed"; \
+			make restart; \
+		done
+
+kill:
+	kill `cat $(PID)` || true
+
+before:
+	echo "actually do nothing"
+
+$(APP): $(GO_FILES)
+	go build $? -o $@
+
+restart: kill before $(APP)
+	./main & echo $$! > $(PID)
+
+.PHONY: serve restart kill before # let's go to reserve rules names
+
+
+
+
+
+
+
+#
+# Run Commands (Black Box)
+#
+.PHONY: run-latest-release run-latest
+
+run-latest-release:     ##@run-black-box Run the current release (When you want to run as service as a black-box)
+	@echo "$(INFO) Pulling release docker image for branch: newtonsystems/$(REPO):$(CURRENT_RELEASE_VERSION)"
+	@echo "$(BLUE)"
+	docker pull newtonsystems/$(REPO):$(CURRENT_RELEASE_VERSION);
+	docker run newtonsystems/$(REPO):$(CURRENT_RELEASE_VERSION);
+	@echo "$(NO_COLOR)"
+
+run-latest:             ##@run-black-box Run the most up-to-date image for your branch from the docker registry or if the image doesnt exist yet you can specify. (When you want to run as service as a black-box)
+	@echo "$(INFO) Running the most up-to-date image"
+	@echo "$(INFO) Pulling latest docker image for branch: newtonsystems/$(REPO):$(CURRENT_BRANCH)"
+
+	@docker pull newtonsystems/$(REPO):$(CURRENT_BRANCH); if [ $$? -ne 0 ] ; then \
+		echo "$(ERROR) Failed to find image in registry: newtonsystems/$(REPO):$(CURRENT_BRANCH)"; \
+		read -r -p "$(GREEN) Specific your own image name or Ctrl+C to exit:$(RESET)   " reply; \
+		docker pull newtonsystems/$(REPO):$$reply; \
+		docker run newtonsystems/$(REPO):$$reply; \
+	else \
+		docker run newtonsystems/$(REPO):$(CURRENT_BRANCH) app; \
+	fi

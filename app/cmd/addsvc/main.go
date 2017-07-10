@@ -27,7 +27,8 @@ import (
 	appdashot "sourcegraph.com/sourcegraph/appdash/opentracing"
 
 	"github.com/go-kit/kit/endpoint"
-	"go-hello/app"
+	"github.com/newtonsystems/go-api-gateway/app"
+
 	//"go-hello/app/pb"
 	//"github.com/go-kit/kit/examples/addsvc/pb"
 	//thriftadd "go-hello/app/cmd/addsvc/thrift/gen-go/addsvc"
@@ -109,7 +110,7 @@ func main() {
 		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
-	logger.Log("msg", "hello")
+	logger.Log("msg", "hello", "level", "info")
 	defer logger.Log("msg", "goodbye")
 
 	stdlog.SetOutput(log.NewStdlibAdapter(logger))

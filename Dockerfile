@@ -1,9 +1,9 @@
 #
 # Main Dockerfile 
 #
-# Should create images < 10MB :)
+# Should create small images < 30MB :)
 #
-FROM alpine:3.5
+FROM alpine:3.6
 LABEL maintainer "james.tarball@newtonsystems.co.uk"
 
 # Add Label Badges to Dockerfile powered by microbadger
@@ -14,7 +14,6 @@ LABEL org.label-schema.vcs-ref=$VCS_REF \
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:$PATH
 
-RUN mkdir -p $GOPATH/bin
-COPY app/main $GOPATH/bin
+COPY main $GOPATH/bin
 
-CMD ["/go/bin/main"]
+ENTRYPOINT ["main"]

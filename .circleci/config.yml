@@ -1,0 +1,127 @@
+#
+# Circle CI 2.0 Docs
+# 
+# For info, see: https://circleci.com/docs/2.0/
+#
+
+version: 2
+jobs:
+  build:
+    docker:
+      - image: newtonsystems/tools-docker-grpc-tools:0.2.2
+    environment:
+      DOCKER_PROJECT_NAME: go-api-gateway
+      TEST_REPORTS: /tmp/test-reports
+      CODECLIMATE_REPO_TOKEN: 9b5bddb06418a3c448e2b90c01dbd8e5ac5971a0da4dcb5cc4484dd79691f60d
+      PYTHON_PACKAGE_LOCATION: ~/
+      KUBECONFIG: ~/dev-utils/config/k8s/kube.config
+    working_directory: ~/go-api-gateway
+    steps:
+      - checkout
+      - setup_remote_docker
+
+      - run:
+          name: Clone docker-utils repo
+          command: |
+            cd ~/
+            git clone -b master git@github.com:newtonsystems/docker-utils.git
+
+      - run:
+          name: Clone dev-utils repo (Development utility scripts/tools)
+          command: |
+            cd ~/
+            git clone -b master https://github.com/newtonsystems/dev-utils.git
+
+      - run:
+          name: Clone devops repo (Update the submodule to the latest change)
+          command: |
+            cd ~/
+            git clone -b $CIRCLE_BRANCH https://github.com/newtonsystems/devops.git
+            cd devops
+            git submodule sync
+            git submodule update --init
+            git submodule foreach git pull origin $CIRCLE_BRANCH
+
+      # - run:
+      #     name: Run Regression Tests (send test coverage to code climate)
+      #     command: |
+      #       # Can't run make check FORCE_IGNORE_PREQ_TEST=true (docker volumes not supported + code climate needs git repo info)
+      #       ./config/bin/run_tests.sh --code-climate
+      #       mkdir -p $TEST_REPORTS
+      #       cp nosetests.xml $TEST_REPORTS/nosetests.xml
+
+      - run:
+          name: Build & Push to Docker Hub (branch and latest (sync'd to master)) 
+          command: |
+            mkdir -p wheelhouse # need to fix this (should really need to do this)
+            docker build -t newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH .
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+                docker tag newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH newtonsystems/$DOCKER_PROJECT_NAME:latest
+                docker push newtonsystems/$DOCKER_PROJECT_NAME:latest
+            fi
+
+      # Upload test results
+      - store_test_results:
+          path: /tmp/test-reports
+
+
+  deploy_kubernetes_branch:
+    docker:
+      - image: newtonsystems/tools-docker-grpc-tools:0.2.2
+    environment:
+      DOCKER_PROJECT_NAME: go-api-gateway
+    working_directory: ~/go-api-gateway
+    steps:
+      - checkout
+      - setup_remote_docker
+
+      - run:
+          name: Clone dev-utils repo (Development utility scripts/tools)
+          command: |
+            cd ~/
+            git clone -b master https://github.com/newtonsystems/dev-utils.git
+
+      - run:
+          name: Clone devops repo (Update the submodule to the latest change)
+          command: |
+            cd ~/
+            git clone -b $CIRCLE_BRANCH https://github.com/newtonsystems/devops.git
+            cd devops
+            git submodule sync
+            git submodule update --init
+            git submodule foreach git pull origin $CIRCLE_BRANCH
+
+      - run: 
+          name: Update kubernetes image - go-api-gateway deployment
+          command: |
+            mkdir -p $HOME/.kube
+            mv ~/dev-utils/config/k8s/kube.config $HOME/.kube/config
+            TIMESTAMP=tmp-$(date +%s)
+            mkdir -p wheelhouse # need to fix this (should really need to do this)
+            docker image build -t $DOCKER_PROJECT_NAME:$TIMESTAMP .
+            kubectl set image -n $CIRCLE_BRANCH -f ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml hello=$DOCKER_PROJECT_NAME:$TIMESTAMP
+            kubectl rollout status ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml --
+            #sleep 60
+            #wait-for-it.sh -t 60 localhost:50000
+            #if [ $? -ne 0 ]; then
+            #    kubectl rollout status ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml --watch=false
+            #    echo -e "Cannot connect to server on port 50000. Will undo rollout of kubernetes image ..."
+            #    kubectl rollout undo ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml
+            #    exit 1
+            #fi
+
+workflows:
+  version: 2
+  dev_stage_featuretest:
+    jobs:
+      - build
+      - deploy_kubernetes_branch:
+          filters:
+            branches:
+              only: 
+                - featuretest
+                - master
+          requires:
+            - build

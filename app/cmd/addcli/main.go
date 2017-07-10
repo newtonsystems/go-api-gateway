@@ -33,6 +33,9 @@ func main() {
 	// example service with a client built on top of a service discovery system,
 	// see profilesvc.
 
+	fmt.Fprintf(os.Stderr, "Currently not implemented")
+	os.Exit(1)
+
 	var (
 		httpAddr        = flag.String("http.addr", "", "HTTP address of addsvc")
 		grpcAddr        = flag.String("grpc.addr", "", "gRPC (HTTP) address of addsvc")
