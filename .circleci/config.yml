@@ -53,7 +53,7 @@ jobs:
       - run:
           name: Build & Push to Docker Hub (branch and latest (sync'd to master)) 
           command: |
-            mkdir -p wheelhouse # need to fix this (should really need to do this)
+            make build-exec
             docker build -t newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH .
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker push newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH
