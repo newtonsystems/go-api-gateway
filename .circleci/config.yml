@@ -67,61 +67,61 @@ jobs:
           path: /tmp/test-reports
 
 
-  deploy_kubernetes_branch:
-    docker:
-      - image: newtonsystems/tools-docker-grpc-tools:0.2.2
-    environment:
-      DOCKER_PROJECT_NAME: go-api-gateway
-    working_directory: ~/go-api-gateway
-    steps:
-      - checkout
-      - setup_remote_docker
+#   deploy_kubernetes_branch:
+#     docker:
+#       - image: newtonsystems/tools-docker-grpc-tools:0.2.2
+#     environment:
+#       DOCKER_PROJECT_NAME: go-api-gateway
+#     working_directory: ~/go-api-gateway
+#     steps:
+#       - checkout
+#       - setup_remote_docker
 
-      - run:
-          name: Clone dev-utils repo (Development utility scripts/tools)
-          command: |
-            cd ~/
-            git clone -b master https://github.com/newtonsystems/dev-utils.git
+#       - run:
+#           name: Clone dev-utils repo (Development utility scripts/tools)
+#           command: |
+#             cd ~/
+#             git clone -b master https://github.com/newtonsystems/dev-utils.git
 
-      - run:
-          name: Clone devops repo (Update the submodule to the latest change)
-          command: |
-            cd ~/
-            git clone -b $CIRCLE_BRANCH https://github.com/newtonsystems/devops.git
-            cd devops
-            git submodule sync
-            git submodule update --init
-            git submodule foreach git pull origin $CIRCLE_BRANCH
+#       - run:
+#           name: Clone devops repo (Update the submodule to the latest change)
+#           command: |
+#             cd ~/
+#             git clone -b $CIRCLE_BRANCH https://github.com/newtonsystems/devops.git
+#             cd devops
+#             git submodule sync
+#             git submodule update --init
+#             git submodule foreach git pull origin $CIRCLE_BRANCH
 
-      - run: 
-          name: Update kubernetes image - go-api-gateway deployment
-          command: |
-            mkdir -p $HOME/.kube
-            mv ~/dev-utils/config/k8s/kube.config $HOME/.kube/config
-            TIMESTAMP=tmp-$(date +%s)
-            mkdir -p wheelhouse # need to fix this (should really need to do this)
-            docker image build -t $DOCKER_PROJECT_NAME:$TIMESTAMP .
-            kubectl set image -n $CIRCLE_BRANCH -f ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml hello=$DOCKER_PROJECT_NAME:$TIMESTAMP
-            kubectl rollout status ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml --
-            #sleep 60
-            #wait-for-it.sh -t 60 localhost:50000
-            #if [ $? -ne 0 ]; then
-            #    kubectl rollout status ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml --watch=false
-            #    echo -e "Cannot connect to server on port 50000. Will undo rollout of kubernetes image ..."
-            #    kubectl rollout undo ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml
-            #    exit 1
-            #fi
+#       - run: 
+#           name: Update kubernetes image - go-api-gateway deployment
+#           command: |
+#             mkdir -p $HOME/.kube
+#             mv ~/dev-utils/config/k8s/kube.config $HOME/.kube/config
+#             TIMESTAMP=tmp-$(date +%s)
+#             mkdir -p wheelhouse # need to fix this (should really need to do this)
+#             docker image build -t $DOCKER_PROJECT_NAME:$TIMESTAMP .
+#             kubectl set image -n $CIRCLE_BRANCH -f ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml hello=$DOCKER_PROJECT_NAME:$TIMESTAMP
+#             kubectl rollout status ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml --
+#             #sleep 60
+#             #wait-for-it.sh -t 60 localhost:50000
+#             #if [ $? -ne 0 ]; then
+#             #    kubectl rollout status ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml --watch=false
+#             #    echo -e "Cannot connect to server on port 50000. Will undo rollout of kubernetes image ..."
+#             #    kubectl rollout undo ~/devops/k8s/deploy/$CIRCLE_BRANCH/$DOCKER_PROJECT_NAME-deployment.yaml
+#             #    exit 1
+#             #fi
 
-workflows:
-  version: 2
-  dev_stage_featuretest:
-    jobs:
-      - build
-      - deploy_kubernetes_branch:
-          filters:
-            branches:
-              only: 
-                - featuretest
-                - master
-          requires:
-            - build
+# workflows:
+#   version: 2
+#   dev_stage_featuretest:
+#     jobs:
+#       - build
+#       - deploy_kubernetes_branch:
+#           filters:
+#             branches:
+#               only: 
+#                 - featuretest
+#                 - master
+#           requires:
+#             - build
