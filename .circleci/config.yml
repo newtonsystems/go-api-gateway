@@ -54,8 +54,8 @@ jobs:
           name: Compile Executable & Build & Push to Docker Hub (branch and latest (sync'd to master)) 
           command: |
             # Cannot use volumes so we cant use 'make build-exec'
-            docker build -t $(REPO):compile -f Dockerfile.build .
-            docker run --rm $(REPO):compile
+            docker build -t $DOCKER_PROJECT_NAME:compile -f Dockerfile.build .
+            docker run --rm $DOCKER_PROJECT_NAME:compile
 
             docker build -t newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH .
             docker login -u $DOCKER_USER -p $DOCKER_PASS
