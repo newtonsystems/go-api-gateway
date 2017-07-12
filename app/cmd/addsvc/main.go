@@ -208,7 +208,7 @@ func main() {
 	errc := make(chan error)
 	//ctx := context.Background()
 
-	conn, err := grpc.Dial("192.168.99.100:30000", grpc.WithInsecure(), grpc.WithTimeout(time.Second))
+	conn, err := grpc.Dial("192.168.99.100:31000", grpc.WithInsecure(), grpc.WithTimeout(time.Second))
 	if err != nil {
 		logger.Log("msg", "Failed to connect to linkerd", "level", "crit")
 		errc <- err
