@@ -55,8 +55,8 @@ jobs:
           command: |
             # Cannot use volumes so we cant use 'make build-exec'
             docker build -t $DOCKER_PROJECT_NAME:compile -f Dockerfile.build .
-            docker run --rm $DOCKER_PROJECT_NAME:compile
-            docker cp main:$PWD
+            docker run --name compiler $DOCKER_PROJECT_NAME:compile
+            docker cp compiler:/go/src/github.com/newtonsystems/go-api-gateway/main $PWD
 
             docker build -t newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH .
             docker login -u $DOCKER_USER -p $DOCKER_PASS
