@@ -51,9 +51,12 @@ jobs:
       #       cp nosetests.xml $TEST_REPORTS/nosetests.xml
 
       - run:
-          name: Build & Push to Docker Hub (branch and latest (sync'd to master)) 
+          name: Compile Executable & Build & Push to Docker Hub (branch and latest (sync'd to master)) 
           command: |
-            make build-exec
+            # Cannot use volumes so we cant use 'make build-exec'
+            docker build -t $(REPO):compile -f Dockerfile.build .
+            docker run --rm $(REPO):compile
+
             docker build -t newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH .
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker push newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH
