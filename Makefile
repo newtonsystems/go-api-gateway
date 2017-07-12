@@ -138,8 +138,13 @@ install-deps-master:
 
 compile:
 	@echo "$(INFO) Getting packages and building alpine go binary ..."
-	make update-deps-$(CURRENT_BRANCH)
-	make install-deps-$(CURRENT_BRANCH)
+	@if [ "$(CURRENT_BRANCH)" != "master" && "$(CURRENT_BRANCH)" != "featuretest" ]; then \
+		make update-deps-master; \
+		make install-deps-master; \
+	else \
+		make update-deps-$(CURRENT_BRANCH); \
+		make install-deps-$(CURRENT_BRANCH); \
+	fi
 	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./app/cmd/addsvc/main.go
 
 # TODO: Should speed this up with voluming vendor/
