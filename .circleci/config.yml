@@ -8,7 +8,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: newtonsystems/tools-docker-grpc-tools:0.2.2
+      - image: newtonsystems/tools-docker-grpc-tools:0.2.3
     environment:
       DOCKER_PROJECT_NAME: go-api-gateway
       TEST_REPORTS: /tmp/test-reports
@@ -56,6 +56,7 @@ jobs:
             # Cannot use volumes so we cant use 'make build-exec'
             docker build -t $DOCKER_PROJECT_NAME:compile -f Dockerfile.build .
             docker run --rm $DOCKER_PROJECT_NAME:compile
+            docker cp main:$PWD
 
             docker build -t newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH .
             docker login -u $DOCKER_USER -p $DOCKER_PASS
