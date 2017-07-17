@@ -1,5 +1,5 @@
 hash: 2ed6c79b88c786c19ac51a4d9ceaf1cac0d06b079e20f65ba5dd8a14085f45cb
-updated: 2017-07-03T20:10:11.278796656+01:00
+updated: 2017-07-16T19:44:58.739897713Z
 imports:
 - name: github.com/afex/hystrix-go
   version: 39520ddd07a9d9a071d615f7476798659f5a3b89
