@@ -14,6 +14,6 @@ LABEL org.label-schema.vcs-ref=$VCS_REF \
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:$PATH
 
-COPY main $GOPATH/bin
+COPY main $GOPATH/bin/
 
 ENTRYPOINT ["main"]

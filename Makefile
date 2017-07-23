@@ -5,7 +5,8 @@
 #
 
 REPO=go-api-gateway
-PROJECT_NAME=apt-gateway
+NEWTON_DIR=/Users/danvir/Masterbox/sideprojects/github/newtonsystems/
+PROJECT_NAME=go-api-gateway
 CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 CURRENT_RELEASE_VERSION=0.0.1
 
@@ -179,8 +180,6 @@ run-dev:    ##@dev Build and run (hot-reload) development docker container (Norm
 	docker run -v "${PWD}":/go/src/github.com/newtonsystems/go-api-gateway  -it $(REPO):dev
 
 
-
-
 PID      = /tmp/awesome-golang-project.pid
 GO_FILES = $(wildcard *.go)
 APP      = ./main
@@ -207,11 +206,6 @@ restart: kill before $(APP)
 .PHONY: serve restart kill before # let's go to reserve rules names
 
 
-
-
-
-
-
 #
 # Run Commands (Black Box)
 #
@@ -236,3 +230,15 @@ run-latest:             ##@run-black-box Run the most up-to-date image for your 
 	else \
 		docker run newtonsystems/$(REPO):$(CURRENT_BRANCH) app; \
 	fi
+
+
+#
+# minikube
+#
+
+mkube-update: build-exec ##@kube Updates service in minikube
+	@echo "$(INFO) Deploying $(REPO):$(TIMESTAMP) by replacing image in kubernetes deployment config"
+	# TODO: add cluster check  - i.e. is minikube pointed at
+	@eval $$(minikube docker-env); docker image build -t newtonsystems/$(REPO):$(TIMESTAMP) -f Dockerfile .
+	kubectl set image -f $(NEWTON_DIR)/devops/k8s/deploy/local/api-deployment.yml go-api-gateway=newtonsystems/$(REPO):$(TIMESTAMP)
+

@@ -11,7 +11,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
-	//"github.com/newtonsystems/grpc_types/go/grpc_types"
+	"github.com/newtonsystems/grpc_types/go/grpc_types"
 	"google.golang.org/grpc"
 	"time"
 )
@@ -40,19 +40,19 @@ type Endpoints struct {
 }
 
 func MakeSayHelloEndpoint(connection *grpc.ClientConn) endpoint.Endpoint {
-	//client := grpc_types.NewHelloClient(connection)
+	client := grpc_types.NewHelloClient(connection)
 
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		//sayHelloReq := request.(sayHelloRequest)
+		sayHelloReq := request.(sayHelloRequest)
 
-		//resp, err := client.SayHello(
-		//	ctx,
-		//	&grpc_types.HelloRequest{Name: sayHelloReq.Name},
-		//)
-		var msg string = "pong"
-		//if resp != nil {
-		//	msg = resp.Message
-		//}
+		resp, err := client.SayHello(
+			ctx,
+			&grpc_types.HelloRequest{Name: sayHelloReq.Name},
+		)
+		var msg string = ""
+		if resp != nil {
+			msg = resp.Message
+		}
 
 		return sayHelloResponse{Message: msg, Err: err}, err
 	}
