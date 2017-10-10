@@ -17,6 +17,17 @@ A base docker image to be used for circleci for compiling and building grpc serv
 
 ## How to use with circleci
 
+- Example curl command
+
+```bash
+curl -H "Content-Type: application/json" -X POST -d '{"Name":"abc"}' http://`minikube ip`:32000/sayhello
+```
+
+
+curl -H "Content-Type: application/json" -X POST -d '{"Name":"abc"}' http://`minikube ip`:32000/sayhello 
+
+
+
 - Add image to `image:` in circleci config
 
 ``` yml

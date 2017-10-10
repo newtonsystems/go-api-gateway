@@ -21,6 +21,7 @@ import:
 - package: github.com/lightstep/lightstep-tracer-go
   version: v0.10.0
 - package: github.com/newtonsystems/grpc_types
+  version: master
   subpackages:
   - go/grpc_types
 - package: github.com/opentracing/opentracing-go

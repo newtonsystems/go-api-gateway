@@ -35,10 +35,13 @@ import (
 // It represents a single RPC method.
 
 type Endpoints struct {
-	SayHelloEndpoint endpoint.Endpoint
-	SayWorldEndpoint endpoint.Endpoint
+	SayHelloEndpoint           endpoint.Endpoint
+	SayWorldEndpoint           endpoint.Endpoint
+	GetAvailableAgentsEndpoint endpoint.Endpoint
 }
 
+// TODO: It is super inefficient to connect via newclient everytime
+// needs sorting to be faster
 func MakeSayHelloEndpoint(connection *grpc.ClientConn) endpoint.Endpoint {
 	client := grpc_types.NewHelloClient(connection)
 
@@ -57,6 +60,27 @@ func MakeSayHelloEndpoint(connection *grpc.ClientConn) endpoint.Endpoint {
 		return sayHelloResponse{Message: msg, Err: err}, err
 	}
 }
+
+func MakeGetAvailableAgentsEndpoint(connection *grpc.ClientConn) endpoint.Endpoint {
+	client := grpc_types.NewAgentMgmtClient(connection)
+
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		getAvailableAgentsReq := request.(getAvailableAgentsRequest)
+		resp, err := client.GetAvailableAgents(
+			ctx,
+			&grpc_types.GetAvailableAgentsRequest{Limit: getAvailableAgentsReq.Limit},
+		)
+
+		var agentIDs []string
+		if resp != nil {
+			agentIDs = resp.AgentIds
+		}
+
+		return getAvailableAgentsResponse{AgentIds: agentIDs, Err: err}, err
+	}
+}
+
+// -- MIDDLEWARE / LOGGING STUFF --
 
 // EndpointInstrumentingMiddleware returns an endpoint middleware that records
 // the duration of each invocation to the passed histogram. The middleware adds
@@ -108,4 +132,14 @@ type sayWorldRequest struct{ Name string }
 
 type sayWorldResponse struct {
 	Message string
+}
+
+// GetAvailableAgents()
+type getAvailableAgentsRequest struct {
+	Limit int32
+}
+
+type getAvailableAgentsResponse struct {
+	AgentIds []string
+	Err      error
 }

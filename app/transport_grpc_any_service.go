@@ -32,15 +32,22 @@ func MakeAllServicesGRPCServer(endpoints Endpoints, tracer stdopentracing.Tracer
 			EncodeGRPCSayHelloResponse,
 			//append(options, grpctransport.ServerBefore(opentracing.FromGRPCRequest(tracer, "Sum", logger)))...,
 		),
+		getavailableagents: grpctransport.NewServer(
+			endpoints.GetAvailableAgentsEndpoint,
+			DecodeGRPCGetAvailableAgentsRequest,
+			EncodeGRPCGetAvailableAgentsResponse,
+			//append(options, grpctransport.ServerBefore(opentracing.FromGRPCRequest(tracer, "Sum", logger)))...,
+		),
 	}
 }
 
 type grpcAllServicesServer struct {
-	sayhello grpctransport.Handler
-	sayworld grpctransport.Handler
+	sayhello           grpctransport.Handler
+	sayworld           grpctransport.Handler
+	getavailableagents grpctransport.Handler
 }
 
-// -- Hello Service
+// -- Service -- //
 
 func (s *grpcAllServicesServer) SayHello(ctx oldcontext.Context, req *grpc_types.HelloRequest) (*grpc_types.HelloResponse, error) {
 	_, rep, err := s.sayhello.ServeGRPC(ctx, req)
@@ -57,6 +64,34 @@ func (s *grpcAllServicesServer) SayWorld(ctx oldcontext.Context, req *grpc_types
 	}
 	return rep.(*grpc_types.WorldResponse), nil
 }
+
+func (s *grpcAllServicesServer) GetAvailableAgents(ctx oldcontext.Context, req *grpc_types.GetAvailableAgentsRequest) (*grpc_types.GetAvailableAgentsResponse, error) {
+	_, rep, err := s.getavailableagents.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.GetAvailableAgentsResponse), nil
+}
+
+// ------------------------------------------------------------------------ //
+
+// -- Agent Mgmt Service
+
+// GetAvailableAgents()
+
+// agent mgmt service (grpc_types) -> go kit
+func DecodeGRPCGetAvailableAgentsRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
+	//req := grpcReq.(*grpc_types.GetAvailableAgentsRequest)
+	return getAvailableAgentsRequest{}, nil
+}
+
+// go-kit -> agent mgmt service (grpc_types)
+func EncodeGRPCGetAvailableAgentsResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(getAvailableAgentsResponse)
+	return &grpc_types.GetAvailableAgentsResponse{AgentIds: resp.AgentIds}, nil
+}
+
+// ------------------------------------------------------------------------ //
 
 // Decode SayHello response i.e from hello service to go-kit structure endpoint
 func DecodeGRPCSayHelloResponse(_ context.Context, grpcReply interface{}) (interface{}, error) {

@@ -1,5 +1,5 @@
-hash: 2ed6c79b88c786c19ac51a4d9ceaf1cac0d06b079e20f65ba5dd8a14085f45cb
-updated: 2017-07-16T19:44:58.739897713Z
+hash: 8268254173a711c8fa28e4927b5f872ad8c174b552fcf897a9652c1fd827d2c2
+updated: 2017-09-17T19:52:55.419683005+01:00
 imports:
 - name: github.com/afex/hystrix-go
   version: 39520ddd07a9d9a071d615f7476798659f5a3b89
@@ -8,7 +8,7 @@ imports:
   - hystrix/metric_collector
   - hystrix/rolling
 - name: github.com/apache/thrift
-  version: 5b4c6bfc627ddbd56d1e98d4b818bec8cd8a5efd
+  version: 0dd823580c78a79ae9696eb9b3650e400fff140f
   subpackages:
   - lib/go/thrift
 - name: github.com/beorn7/perks
@@ -81,7 +81,7 @@ imports:
   subpackages:
   - pbutil
 - name: github.com/newtonsystems/grpc_types
-  version: 35d85c148c294797f8c2050489a7d76f07aa11a1
+  version: 39280b7066cba3aae8e2896a7b0b0d68b3f80489
   subpackages:
   - go/grpc_types
 - name: github.com/opentracing/basictracer-go

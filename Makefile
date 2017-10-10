@@ -5,8 +5,12 @@
 #
 
 REPO=go-api-gateway
+# Repository directory inside docker container
+REPO_DIR=/go/src/github.com/newtonsystems/go-api-gateway
+# Filename of k8s deployment file inside 'local' devops folder
+LOCAL_DEPLOYMENT_FILENAME=api-deployment.yml
+
 NEWTON_DIR=/Users/danvir/Masterbox/sideprojects/github/newtonsystems/
-PROJECT_NAME=go-api-gateway
 CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 CURRENT_RELEASE_VERSION=0.0.1
 
@@ -111,13 +115,13 @@ help-how-to:                 ##@other Shows some useful answers to frequent ques
 update-deps-featuretest:
 	@echo "$(INFO) Updating dependencies for featuretest environment"
 	cp featuretest.yaml glide.lock
-	glide -y featuretest.yaml update
+	glide -y featuretest.yaml update --force
 	cp glide.lock featuretest.lock
 
 update-deps-master:
 	@echo "$(INFO) Updating dependencies for $(BLUE)master$(RESET) environment"
 	cp master.yaml glide.lock
-	glide -y master.yaml update
+	glide -y master.yaml update --force
 	cp glide.lock master.lock
 
 install-deps-featuretest:
@@ -175,14 +179,15 @@ run: build              ##@run Builds and run docker container with tag: '$(REPO
 build-dev:
 	docker build -t $(REPO):dev -f Dockerfile.dev .
 
-run-dev:    ##@dev Build and run (hot-reload) development docker container (Normally run this for dev changes)
+run-dev: build-dev    ##@dev Build and run (hot-reload) development docker container (Normally run this for dev changes)
 	@echo ""
 	docker run -v "${PWD}":/go/src/github.com/newtonsystems/go-api-gateway  -it $(REPO):dev
 
 
-PID      = /tmp/awesome-golang-project.pid
-GO_FILES = $(wildcard *.go)
+PID      = /tmp/$(REPO).pid
+GO_FILES = app/
 APP      = ./main
+APP_MAIN = app/cmd/addsvc/main.go
 
 serve: restart
 	inotifywait -r -m . -e create -e modify | \
@@ -203,7 +208,24 @@ $(APP): $(GO_FILES)
 restart: kill before $(APP)
 	./main & echo $$! > $(PID)
 
-.PHONY: serve restart kill before # let's go to reserve rules names
+.PHONY: serve restart kill before gorun# let's go to reserve rules names
+
+
+gorun:
+	go run $(APP_MAIN)
+
+restart-fast:
+	@go run $(APP_MAIN) --debug.addr :8074 --debug.httpanyservice.addr :9014 & echo $$! > $(PID)
+
+local-reload-fast: restart-fast
+	@fswatch $(GO_FILES) | while read; do \
+			echo "$(INFO) Detected a change, deleting a pod to restart the service"; \
+			make kill; \
+			sleep 10; \
+			make restart-fast; \
+		done
+
+
 
 
 #
@@ -236,9 +258,27 @@ run-latest:             ##@run-black-box Run the most up-to-date image for your 
 # minikube
 #
 
-mkube-update: build-exec ##@kube Updates service in minikube
-	@echo "$(INFO) Deploying $(REPO):$(TIMESTAMP) by replacing image in kubernetes deployment config"
-	# TODO: add cluster check  - i.e. is minikube pointed at
-	@eval $$(minikube docker-env); docker image build -t newtonsystems/$(REPO):$(TIMESTAMP) -f Dockerfile .
-	kubectl set image -f $(NEWTON_DIR)/devops/k8s/deploy/local/api-deployment.yml go-api-gateway=newtonsystems/$(REPO):$(TIMESTAMP)
+mkube-run-dev:               ##@kube Run service in minikube (hot-reload)
+	@echo "$(INFO) Running $(REPO):kube-dev (Dev in Minikube) by replacing image in kubernetes deployment config"
+	@eval $$(minikube docker-env); docker image build -t newtonsystems/$(REPO):kube-dev -f Dockerfile.dev .
+	kubectl replace -f $(NEWTON_DIR)/devops/k8s/deploy/local/$(LOCAL_DEPLOYMENT_FILENAME)
+	kubectl set image -f $(NEWTON_DIR)/devops/k8s/deploy/local/$(LOCAL_DEPLOYMENT_FILENAME) $(REPO)=newtonsystems/$(REPO):kube-dev
+	make update-deps-master
+	make install-deps-master
+	@echo "$(INFO) Hooking to logs in minikube ..."
+	@kubectl logs -f `kubectl get pods -o wide | grep $(REPO) | grep Running | cut -d ' ' -f1` &
+	# Add a liveness probe instead of sleep
+	@fswatch $(GO_FILES) | while read; do \
+			echo "$(INFO) Detected a change, deleting a pod to restart the service"; \
+			kubectl delete pod `kubectl get pods -o wide | grep $(REPO) | grep Running | cut -d ' ' -f1` ; \
+			sleep 15; \
+			kubectl logs -f `kubectl get pods -o wide | grep $(REPO) | grep Running | cut -d ' ' -f1` & \
+		done
+
+
+
+
+
+
+
 

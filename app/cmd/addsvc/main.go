@@ -36,8 +36,7 @@ import (
 	"github.com/go-kit/kit/metrics"
 	"github.com/go-kit/kit/metrics/prometheus"
 	"github.com/go-kit/kit/tracing/opentracing"
-
-	"github.com/newtonsystems/grpc_types/go/grpc_types"
+	//"github.com/newtonsystems/grpc_types/go/grpc_types"
 )
 
 var ColourKeys = func(keyvals ...interface{}) term.FgBgColor {
@@ -74,7 +73,7 @@ func main() {
 
 		// Debug only (Should NEVER be used in production)
 		httpAnyServiceAddr = flag.String("debug.httpanyservice.addr", ":9001", "HTTP listen address for accessing any service")
-		gRPCAnyServiceAddr = flag.String("debug.grpcanyservice.addr", ":9002", "gRPC (HTTP) listen address for accessing any service")
+		//gRPCAnyServiceAddr = flag.String("debug.grpcanyservice.addr", ":9002", "gRPC (HTTP) listen address for accessing any service")
 	)
 	flag.Parse()
 
@@ -227,8 +226,20 @@ func main() {
 		sayHelloEndpoint = addsvc.EndpointLoggingMiddleware(sayHelloLogger)(sayHelloEndpoint)
 	}
 
+	var getAvailableAgentsEndpoint endpoint.Endpoint
+	{
+		getAvailableAgentsDuration := duration.With("method", "GetAvailableAgents")
+		getAvailableAgentsLogger := log.With(logger, "method", "GetAvailableAgents")
+
+		getAvailableAgentsEndpoint = addsvc.MakeGetAvailableAgentsEndpoint(conn)
+		getAvailableAgentsEndpoint = opentracing.TraceServer(tracer, "GetAvailableAgents")(getAvailableAgentsEndpoint)
+		getAvailableAgentsEndpoint = addsvc.EndpointInstrumentingMiddleware(getAvailableAgentsDuration)(getAvailableAgentsEndpoint)
+		getAvailableAgentsEndpoint = addsvc.EndpointLoggingMiddleware(getAvailableAgentsLogger)(getAvailableAgentsEndpoint)
+	}
+
 	endpoints := addsvc.Endpoints{
-		SayHelloEndpoint: sayHelloEndpoint,
+		SayHelloEndpoint:           sayHelloEndpoint,
+		GetAvailableAgentsEndpoint: getAvailableAgentsEndpoint,
 	}
 
 	// Interrupt handler.
@@ -251,7 +262,18 @@ func main() {
 		m.Handle("/metrics", promhttp.Handler())
 
 		logger.Log("addr", *debugAddr)
-		errc <- http.ListenAndServe(*debugAddr, m)
+		debugListener, err := net.Listen("tcp", *debugAddr)
+		if err != nil {
+			logger.Log("transport", "debug", "during", "Listen", "err", err)
+			errc <- err
+			return
+		}
+		errc <- http.Serve(debugListener, m)
+
+		//errc <- http.ListenAndServe(*httpAnyServiceAddr, h2)
+		defer debugListener.Close()
+
+		//errc <- http.ListenAndServe(*debugAddr, m)
 	}()
 
 	// HTTP transport.
@@ -290,28 +312,38 @@ func main() {
 			logger := log.With(logger, "tag", "#debughttp")
 			h2 := addsvc.MakeDebugHTTPHandler(endpoints, tracer, logger)
 			logger.Log("addr", *httpAnyServiceAddr, "tag", "#setup")
-			errc <- http.ListenAndServe(*httpAnyServiceAddr, h2)
-		}()
 
-		// gRPC transport for access to any gRPC service.
-		go func() {
-			logger := log.With(logger, "msg", "Debug Any Service", "transport", "gRPC")
-
-			ln, err := net.Listen("tcp", *gRPCAnyServiceAddr)
+			debugListener, err := net.Listen("tcp", *httpAnyServiceAddr)
 			if err != nil {
+				logger.Log("transport", "debug/HTTP", "during", "Listen", "err", err)
 				errc <- err
 				return
 			}
+			errc <- http.Serve(debugListener, h2)
 
-			srv2 := addsvc.MakeAllServicesGRPCServer(endpoints, tracer, logger)
-			s2 := grpc.NewServer()
-			//pb.RegisterAddServer(s, srv)
-			grpc_types.RegisterHelloServer(s2, srv2)
-			grpc_types.RegisterWorldServer(s2, srv2)
-
-			logger.Log("addr", *gRPCAnyServiceAddr)
-			errc <- s2.Serve(ln)
+			//errc <- http.ListenAndServe(*httpAnyServiceAddr, h2)
+			defer debugListener.Close()
 		}()
+
+		// gRPC transport for access to any gRPC service.
+		// go func() {
+		// 	logger := log.With(logger, "msg", "Debug Any Service", "transport", "gRPC")
+
+		// 	ln, err := net.Listen("tcp", *gRPCAnyServiceAddr)
+		// 	if err != nil {
+		// 		errc <- err
+		// 		return
+		// 	}
+
+		// 	srv2 := addsvc.MakeAllServicesGRPCServer(endpoints, tracer, logger)
+		// 	s2 := grpc.NewServer()
+		// 	//pb.RegisterAddServer(s, srv)
+		// 	grpc_types.RegisterHelloServer(s2, srv2)
+		// 	grpc_types.RegisterWorldServer(s2, srv2)
+
+		// 	logger.Log("addr", *gRPCAnyServiceAddr)
+		// 	errc <- s2.Serve(ln)
+		// }()
 	}
 
 	// Run!
