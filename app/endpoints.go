@@ -38,6 +38,7 @@ type Endpoints struct {
 	SayHelloEndpoint           endpoint.Endpoint
 	SayWorldEndpoint           endpoint.Endpoint
 	GetAvailableAgentsEndpoint endpoint.Endpoint
+	GetAgentIDFromRefEndpoint  endpoint.Endpoint
 }
 
 // TODO: It is super inefficient to connect via newclient everytime
@@ -77,6 +78,25 @@ func MakeGetAvailableAgentsEndpoint(connection *grpc.ClientConn) endpoint.Endpoi
 		}
 
 		return getAvailableAgentsResponse{AgentIds: agentIDs, Err: err}, err
+	}
+}
+
+func MakeGetAgentIDFromRefEndpoint(connection *grpc.ClientConn) endpoint.Endpoint {
+	client := grpc_types.NewAgentMgmtClient(connection)
+
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		getAgentIDFromRefReq := request.(getAgentIDFromRefRequest)
+		resp, err := client.GetAgentIDFromRef(
+			ctx,
+			&grpc_types.GetAgentIDFromRefRequest{RefId: getAgentIDFromRefReq.RefId},
+		)
+
+		var agentID int32
+		if resp != nil {
+			agentID = resp.AgentId
+		}
+
+		return getAgentIDFromRefResponse{AgentId: agentID, Err: err}, err
 	}
 }
 
@@ -142,4 +162,14 @@ type getAvailableAgentsRequest struct {
 type getAvailableAgentsResponse struct {
 	AgentIds []string
 	Err      error
+}
+
+// GetAgentIDFromRef()
+type getAgentIDFromRefRequest struct {
+	RefId string
+}
+
+type getAgentIDFromRefResponse struct {
+	AgentId int32
+	Err     error
 }

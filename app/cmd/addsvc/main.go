@@ -237,9 +237,21 @@ func main() {
 		getAvailableAgentsEndpoint = addsvc.EndpointLoggingMiddleware(getAvailableAgentsLogger)(getAvailableAgentsEndpoint)
 	}
 
+	var getAgentIDFromRefEndpoint endpoint.Endpoint
+	{
+		getAgentIDFromRefDuration := duration.With("method", "GetAgentIDFromRef")
+		getAgentIDFromRefLogger := log.With(logger, "method", "GetAgentIDFromRef")
+
+		getAgentIDFromRefEndpoint = addsvc.MakeGetAgentIDFromRefEndpoint(conn)
+		getAgentIDFromRefEndpoint = opentracing.TraceServer(tracer, "GetAgentIDFromRef")(getAgentIDFromRefEndpoint)
+		getAgentIDFromRefEndpoint = addsvc.EndpointInstrumentingMiddleware(getAgentIDFromRefDuration)(getAgentIDFromRefEndpoint)
+		getAgentIDFromRefEndpoint = addsvc.EndpointLoggingMiddleware(getAgentIDFromRefLogger)(getAgentIDFromRefEndpoint)
+	}
+
 	endpoints := addsvc.Endpoints{
 		SayHelloEndpoint:           sayHelloEndpoint,
 		GetAvailableAgentsEndpoint: getAvailableAgentsEndpoint,
+		GetAgentIDFromRefEndpoint:  getAgentIDFromRefEndpoint,
 	}
 
 	// Interrupt handler.

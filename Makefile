@@ -111,16 +111,28 @@ help-how-to:                 ##@other Shows some useful answers to frequent ques
 #
 # Go Dependencies commands
 #
+rebuild-deps-featuretest:
+	@echo "$(INFO) Updating dependencies for featuretest environment"
+	cp featuretest.lock glide.lock
+	glide -y featuretest.yaml rebuild
+	cp glide.lock featuretest.lock
+
+rebuild-deps-master:
+	@echo "$(INFO) Updating dependencies for $(BLUE)master$(RESET) environment"
+	cp master.lock glide.lock
+	glide -y master.yaml rebuild
+	cp glide.lock master.lock
+
 
 update-deps-featuretest:
 	@echo "$(INFO) Updating dependencies for featuretest environment"
-	cp featuretest.yaml glide.lock
+	cp featuretest.lock glide.lock
 	glide -y featuretest.yaml update --force
 	cp glide.lock featuretest.lock
 
 update-deps-master:
 	@echo "$(INFO) Updating dependencies for $(BLUE)master$(RESET) environment"
-	cp master.yaml glide.lock
+	cp master.lock glide.lock
 	glide -y master.yaml update --force
 	cp glide.lock master.lock
 

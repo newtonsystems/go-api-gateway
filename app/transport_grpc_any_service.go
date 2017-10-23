@@ -38,6 +38,18 @@ func MakeAllServicesGRPCServer(endpoints Endpoints, tracer stdopentracing.Tracer
 			EncodeGRPCGetAvailableAgentsResponse,
 			//append(options, grpctransport.ServerBefore(opentracing.FromGRPCRequest(tracer, "Sum", logger)))...,
 		),
+		getagentidfromref: grpctransport.NewServer(
+			endpoints.GetAgentIDFromRefEndpoint,
+			DecodeGRPCGetAgentIDFromRefRequest,
+			EncodeGRPCGetAgentIDFromRefResponse,
+			//append(options, grpctransport.ServerBefore(opentracing.FromGRPCRequest(tracer, "Sum", logger)))...,
+		),
+		acceptcall: grpctransport.NewServer(
+			endpoints.GetAgentIDFromRefEndpoint,
+			DecodeGRPCGetAgentIDFromRefRequest,
+			EncodeGRPCGetAgentIDFromRefResponse,
+			//append(options, grpctransport.ServerBefore(opentracing.FromGRPCRequest(tracer, "Sum", logger)))...,
+		),
 	}
 }
 
@@ -45,6 +57,9 @@ type grpcAllServicesServer struct {
 	sayhello           grpctransport.Handler
 	sayworld           grpctransport.Handler
 	getavailableagents grpctransport.Handler
+	getagentidfromref  grpctransport.Handler
+	acceptcall         grpctransport.Handler
+	heartbeat          grpctransport.Handler
 }
 
 // -- Service -- //
@@ -73,6 +88,30 @@ func (s *grpcAllServicesServer) GetAvailableAgents(ctx oldcontext.Context, req *
 	return rep.(*grpc_types.GetAvailableAgentsResponse), nil
 }
 
+func (s *grpcAllServicesServer) GetAgentIDFromRef(ctx oldcontext.Context, req *grpc_types.GetAgentIDFromRefRequest) (*grpc_types.GetAgentIDFromRefResponse, error) {
+	_, rep, err := s.getagentidfromref.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.GetAgentIDFromRefResponse), nil
+}
+
+func (s *grpcAllServicesServer) AcceptCall(ctx oldcontext.Context, req *grpc_types.AcceptCallRequest) (*grpc_types.AcceptCallResponse, error) {
+	_, rep, err := s.acceptcall.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.AcceptCallResponse), nil
+}
+
+func (s *grpcAllServicesServer) HeartBeat(ctx oldcontext.Context, req *grpc_types.HeartBeatRequest) (*grpc_types.HeartBeatResponse, error) {
+	_, rep, err := s.heartbeat.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.HeartBeatResponse), nil
+}
+
 // ------------------------------------------------------------------------ //
 
 // -- Agent Mgmt Service
@@ -89,6 +128,26 @@ func DecodeGRPCGetAvailableAgentsRequest(_ context.Context, grpcReq interface{})
 func EncodeGRPCGetAvailableAgentsResponse(_ context.Context, response interface{}) (interface{}, error) {
 	resp := response.(getAvailableAgentsResponse)
 	return &grpc_types.GetAvailableAgentsResponse{AgentIds: resp.AgentIds}, nil
+}
+
+// ------------------------------------------------------------------------ //
+
+// ------------------------------------------------------------------------ //
+
+// -- Agent Mgmt Service
+
+// GetAgentIDFromRef()
+
+// agent mgmt service (grpc_types) -> go kit
+func DecodeGRPCGetAgentIDFromRefRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
+	//req := grpcReq.(*grpc_types.GetAgentIDFromRefRequest)
+	return getAgentIDFromRefRequest{}, nil
+}
+
+// go-kit -> agent mgmt service (grpc_types)
+func EncodeGRPCGetAgentIDFromRefResponse(_ context.Context, response interface{}) (interface{}, error) {
+	resp := response.(getAgentIDFromRefResponse)
+	return &grpc_types.GetAgentIDFromRefResponse{AgentId: resp.AgentId}, nil
 }
 
 // ------------------------------------------------------------------------ //

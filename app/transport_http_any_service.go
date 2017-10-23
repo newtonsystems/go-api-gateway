@@ -38,6 +38,12 @@ func MakeDebugHTTPHandler(endpoints Endpoints, tracer stdopentracing.Tracer, log
 		EncodeHTTPGenericResponse,
 		append(options, httptransport.ServerBefore(httptransport.PopulateRequestContext), httptransport.ServerBefore(opentracing.FromHTTPRequest(tracer, "GetAvailableAgents", logger)))...,
 	))
+	m.Handle("/getagentidfromref", httptransport.NewServer(
+		endpoints.GetAgentIDFromRefEndpoint,
+		DecodeHTTPGetAgentIDFromRefRequest,
+		EncodeHTTPGenericResponse,
+		append(options, httptransport.ServerBefore(httptransport.PopulateRequestContext), httptransport.ServerBefore(opentracing.FromHTTPRequest(tracer, "GetAgentIDFromRef", logger)))...,
+	))
 
 	return m
 }
@@ -55,6 +61,14 @@ func DecodeHTTPSayHelloRequest(ctx context.Context, r *http.Request) (interface{
 func DecodeHTTPGetAvailableAgentsRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	main_logger.Log(getRequestInfoArgs(r)...)
 	var req getAvailableAgentsRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	return req, err
+}
+
+// -- GetAgentIDFromRef
+func DecodeHTTPGetAgentIDFromRefRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	main_logger.Log(getRequestInfoArgs(r)...)
+	var req getAgentIDFromRefRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	return req, err
 }

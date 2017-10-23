@@ -27,7 +27,6 @@ import:
 - package: github.com/opentracing/opentracing-go
   version: v1.0.2
 - package: github.com/openzipkin/zipkin-go-opentracing
-  version: v0.2.4
 - package: github.com/prometheus/client_golang
   version: v0.8.0
   subpackages:
@@ -42,3 +41,7 @@ import:
 - package: sourcegraph.com/sourcegraph/appdash
   subpackages:
   - opentracing
+- package: github.com/apache/thrift
+  version: ~0.10.0
+  subpackages:
+  - lib/go/thrift
