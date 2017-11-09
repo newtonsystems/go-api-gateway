@@ -19,7 +19,7 @@ import (
 	"github.com/go-kit/kit/log/term"
 	lightstep "github.com/lightstep/lightstep-tracer-go"
 	stdopentracing "github.com/opentracing/opentracing-go"
-	zipkin "github.com/openzipkin/zipkin-go-opentracing"
+	//zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
@@ -148,42 +148,42 @@ func main() {
 			logger := log.With(logger, "tracer", "ZipkinHTTP")
 			logger.Log("addr", *zipkinAddr)
 
-			// endpoint typically looks like: http://zipkinhost:9411/api/v1/spans
-			collector, err := zipkin.NewHTTPCollector(*zipkinAddr)
-			if err != nil {
-				logger.Log("err", err)
-				os.Exit(1)
-			}
-			defer collector.Close()
-
-			tracer, err = zipkin.NewTracer(
-				zipkin.NewRecorder(collector, false, "localhost:80", "addsvc"),
-			)
-			if err != nil {
-				logger.Log("err", err)
-				os.Exit(1)
-			}
-		} else if *zipkinKafkaAddr != "" {
-			logger := log.With(logger, "tracer", "ZipkinKafka")
-			logger.Log("addr", *zipkinKafkaAddr)
-
-			collector, err := zipkin.NewKafkaCollector(
-				strings.Split(*zipkinKafkaAddr, ","),
-				zipkin.KafkaLogger(log.NewNopLogger()),
-			)
-			if err != nil {
-				logger.Log("err", err)
-				os.Exit(1)
-			}
-			defer collector.Close()
-
-			tracer, err = zipkin.NewTracer(
-				zipkin.NewRecorder(collector, false, "localhost:80", "addsvc"),
-			)
-			if err != nil {
-				logger.Log("err", err)
-				os.Exit(1)
-			}
+		// 	// endpoint typically looks like: http://zipkinhost:9411/api/v1/spans
+		// 	collector, err := zipkin.NewHTTPCollector(*zipkinAddr)
+		// 	if err != nil {
+		// 		logger.Log("err", err)
+		// 		os.Exit(1)
+		// 	}
+		// 	defer collector.Close()
+		//
+		// 	tracer, err = zipkin.NewTracer(
+		// 		zipkin.NewRecorder(collector, false, "localhost:80", "addsvc"),
+		// 	)
+		// 	if err != nil {
+		// 		logger.Log("err", err)
+		// 		os.Exit(1)
+		// 	}
+		// } else if *zipkinKafkaAddr != "" {
+		// 	logger := log.With(logger, "tracer", "ZipkinKafka")
+		// 	logger.Log("addr", *zipkinKafkaAddr)
+		//
+		// 	collector, err := zipkin.NewKafkaCollector(
+		// 		strings.Split(*zipkinKafkaAddr, ","),
+		// 		zipkin.KafkaLogger(log.NewNopLogger()),
+		// 	)
+		// 	if err != nil {
+		// 		logger.Log("err", err)
+		// 		os.Exit(1)
+		// 	}
+		// 	defer collector.Close()
+		//
+		// 	tracer, err = zipkin.NewTracer(
+		// 		zipkin.NewRecorder(collector, false, "localhost:80", "addsvc"),
+		// 	)
+		// 	if err != nil {
+		// 		logger.Log("err", err)
+		// 		os.Exit(1)
+		// 	}
 		} else if *appdashAddr != "" {
 			logger := log.With(logger, "tracer", "Appdash")
 			logger.Log("addr", *appdashAddr)

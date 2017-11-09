@@ -93,14 +93,6 @@ imports:
   subpackages:
   - ext
   - log
-- name: github.com/openzipkin/zipkin-go-opentracing
-  version: d88c90182f3fb514be54a1c7adc11a04d41c7da9
-  subpackages:
-  - _thrift/gen-go/scribe
-  - _thrift/gen-go/zipkincore
-  - flag
-  - types
-  - wire
 - name: github.com/pierrec/lz4
   version: 08c27939df1bd95e881e2c2367a749964ad1fceb
 - name: github.com/pierrec/xxHash
