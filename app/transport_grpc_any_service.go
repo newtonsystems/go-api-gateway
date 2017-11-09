@@ -36,11 +36,42 @@ func MakeAllServicesGRPCServer(endpoints Endpoints, tracer stdopentracing.Tracer
 }
 
 type grpcAllServicesServer struct {
-	sayhello grpctransport.Handler
-	sayworld grpctransport.Handler
+	sayhello           grpctransport.Handler
+	sayworld           grpctransport.Handler
+	getavailableagents grpctransport.Handler
+	getagentidfromref  grpctransport.Handler
+	acceptcall         grpctransport.Handler
+	heartbeat          grpctransport.Handler
+	addtask            grpctransport.Handler
+	ping               grpctransport.Handler
 }
 
 // -- Hello Service
+func (s *grpcAllServicesServer) Ping(ctx oldcontext.Context, req *grpc_types.PingRequest) (*grpc_types.PingResponse, error) {
+	_, rep, err := s.getavailableagents.ServeGRPC(ctx, req)
+
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.PingResponse), nil
+}
+
+func (s *grpcAllServicesServer) GetAvailableAgents(ctx oldcontext.Context, req *grpc_types.GetAvailableAgentsRequest) (*grpc_types.GetAvailableAgentsResponse, error) {
+	_, rep, err := s.getavailableagents.ServeGRPC(ctx, req)
+
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.GetAvailableAgentsResponse), nil
+}
+
+func (s *grpcAllServicesServer) GetAgentIDFromRef(ctx oldcontext.Context, req *grpc_types.GetAgentIDFromRefRequest) (*grpc_types.GetAgentIDFromRefResponse, error) {
+	_, rep, err := s.getagentidfromref.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.GetAgentIDFromRefResponse), nil
+}
 
 func (s *grpcAllServicesServer) SayHello(ctx oldcontext.Context, req *grpc_types.HelloRequest) (*grpc_types.HelloResponse, error) {
 	_, rep, err := s.sayhello.ServeGRPC(ctx, req)
@@ -56,6 +87,30 @@ func (s *grpcAllServicesServer) SayWorld(ctx oldcontext.Context, req *grpc_types
 		return nil, err
 	}
 	return rep.(*grpc_types.WorldResponse), nil
+}
+
+func (s *grpcAllServicesServer) AcceptCall(ctx oldcontext.Context, req *grpc_types.AcceptCallRequest) (*grpc_types.AcceptCallResponse, error) {
+	_, rep, err := s.acceptcall.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.AcceptCallResponse), nil
+}
+
+func (s *grpcAllServicesServer) HeartBeat(ctx oldcontext.Context, req *grpc_types.HeartBeatRequest) (*grpc_types.HeartBeatResponse, error) {
+	_, rep, err := s.heartbeat.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.HeartBeatResponse), nil
+}
+
+func (s *grpcAllServicesServer) AddTask(ctx oldcontext.Context, req *grpc_types.AddTaskRequest) (*grpc_types.AddTaskResponse, error) {
+	_, rep, err := s.addtask.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rep.(*grpc_types.AddTaskResponse), nil
 }
 
 // Decode SayHello response i.e from hello service to go-kit structure endpoint

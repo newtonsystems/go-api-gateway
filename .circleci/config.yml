@@ -1,6 +1,6 @@
 #
 # Circle CI 2.0 Docs
-# 
+#
 # For info, see: https://circleci.com/docs/2.0/
 #
 
@@ -15,6 +15,9 @@ jobs:
       CODECLIMATE_REPO_TOKEN: 9b5bddb06418a3c448e2b90c01dbd8e5ac5971a0da4dcb5cc4484dd79691f60d
       PYTHON_PACKAGE_LOCATION: ~/
       KUBECONFIG: ~/dev-utils/config/k8s/kube.config
+      # NOTE: Cant use ~ or $HOME
+      NEWTON_PATH: /root
+      DEV_UTILS_PATH: /root/dev-utils
     working_directory: ~/go-api-gateway
     steps:
       - checkout
@@ -45,26 +48,13 @@ jobs:
       # - run:
       #     name: Run Regression Tests (send test coverage to code climate)
       #     command: |
-      #       # Can't run make check FORCE_IGNORE_PREQ_TEST=true (docker volumes not supported + code climate needs git repo info)
-      #       ./config/bin/run_tests.sh --code-climate
-      #       mkdir -p $TEST_REPORTS
-      #       cp nosetests.xml $TEST_REPORTS/nosetests.xml
+      #       ~/dev-utils/bin/mkubectl.sh --circleci-go-run-tests
 
       - run:
-          name: Compile Executable & Build & Push to Docker Hub (branch and latest (sync'd to master)) 
+          name: Compile Executable & Build & Push to Docker Hub (branch and latest (sync'd to master))
           command: |
             # Cannot use volumes so we cant use 'make build-exec'
-            docker build -t $DOCKER_PROJECT_NAME:compile -f Dockerfile.build .
-            docker run --name compiler $DOCKER_PROJECT_NAME:compile
-            docker cp compiler:/go/src/github.com/newtonsystems/go-api-gateway/main $PWD
-
-            docker build -t newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH .
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker push newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-                docker tag newtonsystems/$DOCKER_PROJECT_NAME:$CIRCLE_BRANCH newtonsystems/$DOCKER_PROJECT_NAME:latest
-                docker push newtonsystems/$DOCKER_PROJECT_NAME:latest
-            fi
+            ~/dev-utils/bin/mkubectl.sh --circleci-build-push-to-dockerhub
 
       # Upload test results
       - store_test_results:
@@ -97,7 +87,7 @@ jobs:
 #             git submodule update --init
 #             git submodule foreach git pull origin $CIRCLE_BRANCH
 
-#       - run: 
+#       - run:
 #           name: Update kubernetes image - go-api-gateway deployment
 #           command: |
 #             mkdir -p $HOME/.kube
@@ -124,7 +114,7 @@ jobs:
 #       - deploy_kubernetes_branch:
 #           filters:
 #             branches:
-#               only: 
+#               only:
 #                 - featuretest
 #                 - master
 #           requires:
