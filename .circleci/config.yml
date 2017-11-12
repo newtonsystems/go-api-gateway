@@ -8,7 +8,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: newtonsystems/tools-docker-grpc-tools:0.2.5
+      - image: newtonsystems/tools-docker-grpc-tools:0.2.6
     environment:
       DOCKER_PROJECT_NAME: go-api-gateway
       TEST_REPORTS: /tmp/test-reports
