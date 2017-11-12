@@ -18,7 +18,7 @@ jobs:
       # NOTE: Cant use ~ or $HOME
       NEWTON_PATH: /root
       DEV_UTILS_PATH: /root/dev-utils
-    working_directory: ~/go-api-gateway
+    working_directory: /go/src/github.com/newtonsystems/go-api-gateway
     steps:
       - checkout
       - setup_remote_docker
