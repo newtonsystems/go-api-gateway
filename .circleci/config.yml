@@ -18,6 +18,7 @@ jobs:
       # NOTE: Cant use ~ or $HOME
       NEWTON_PATH: /root
       DEV_UTILS_PATH: /root/dev-utils
+      GO_MAIN: ./app/cmd/addsvc/main.go
     working_directory: /go/src/github.com/newtonsystems/go-api-gateway
     steps:
       - checkout
