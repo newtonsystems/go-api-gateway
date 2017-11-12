@@ -48,8 +48,19 @@ HELP_FUN = \
 help:         ##@other Show this help.
 	@perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
 
+#
+# Arg Utilities for Makefile
+#
+
+ifeq (get,$(firstword $(MAKECMDGOALS)))
+  # use the rest as arguments for "run"
+  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  # ...and turn them into do-nothing targets
+  $(eval $(RUN_ARGS):;@:)
+endif
+
 # ------------------------------------------------------------------------------
-.PHONY: update master build
+.PHONY: update master build get
 
 update:       ##@build Updates dependencies for your go application
 	bash -c "mkubectl.sh --update-deps"
@@ -57,8 +68,12 @@ update:       ##@build Updates dependencies for your go application
 install:      ##@build Install dependencies for your go application
 	bash -c "mkubectl.sh --install-deps"
 
+get:        ##@build Add dependency for your go application
+	bash -c "mkubectl.sh --get-deps $(RUN_ARGS)"
+
 build:        ##@compile Builds executable cross compiled for alpine docker
 	bash -c "mkubectl.sh --compile-inside-docker ${REPO} ${GO_MAIN}"
+
 
 # ------------------------------------------------------------------------------
 # CircleCI support
@@ -70,17 +85,27 @@ check:        ##@circleci Needed for running circleci tests
 
 # ------------------------------------------------------------------------------
 # Non docker local development (can be useful for super fast local/debugging)
-.PHONY: run-conn-local
+.PHONY: run-conn run-build-bin clean
 
-run-conn:    ##@dev Run locally (outside docker) (but connect to minikube linkerd etc)
+run-conn:          ##@devlocal Run locally (outside docker) (but connect to minikube linkerd etc)
+	@echo "$(INFO) Running go service outside of docker ...."
 	go run ${GO_MAIN} --conn.local
+
+run-build-bin:      ##@devlocal Builds binary locally (outside docker)
+	bash -c "REPO=${REPO} GO_MAIN=${GO_MAIN} mkubectl.sh --compile"
+
+clean:
+	@rm -rf vendor/
+	@rm -f ${REPO}
+	@rm -f Gopkg.toml Gopkg.lock
+
 
 # ------------------------------------------------------------------------------
 # Minikube (Normal Development)
 .PHONY: run swap-hot-local swap-latest swap-latest-release
 
 run:                    ##@dev Alias for swap-hot-local
-	@make swap-hot-local
+	@make REPO=${REPO} GO_MAIN=${GO_MAIN} swap-hot-local
 
 swap-hot-local:         ##@dev Swaps $(REPO) deployment in minikube with hot-reloadable docker image (You must make sure you are running i.e. infra-minikube.sh --create)
 	@bash -c "mkubectl.sh --hot-reload-deployment ${REPO} ${LOCAL_DEPLOYMENT_FILENAME} ${GO_PORT}"

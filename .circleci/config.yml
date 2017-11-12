@@ -8,7 +8,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: newtonsystems/tools-docker-grpc-tools:0.2.3
+      - image: newtonsystems/tools-docker-grpc-tools:0.2.5
     environment:
       DOCKER_PROJECT_NAME: go-api-gateway
       TEST_REPORTS: /tmp/test-reports
@@ -53,7 +53,6 @@ jobs:
       - run:
           name: Compile Executable & Build & Push to Docker Hub (branch and latest (sync'd to master))
           command: |
-            # Cannot use volumes so we cant use 'make build-exec'
             ~/dev-utils/bin/mkubectl.sh --circleci-build-push-to-dockerhub
 
       # Upload test results
@@ -106,16 +105,21 @@ jobs:
 #             #    exit 1
 #             #fi
 
-# workflows:
-#   version: 2
-#   dev_stage_featuretest:
-#     jobs:
-#       - build
-#       - deploy_kubernetes_branch:
-#           filters:
-#             branches:
-#               only:
-#                 - featuretest
-#                 - master
-#           requires:
-#             - build
+workflows:
+  version: 2
+  dev_stage_envs:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - featuretest
+                - master
+      # - deploy_kubernetes_branch:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - featuretest
+      #           - master
+          # requires:
+          #   - build

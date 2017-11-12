@@ -1,3 +1,4 @@
-.glide/
 vendor/
-main
+go-api-gateway
+Gopkg.toml
+Gopkg.lock

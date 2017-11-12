@@ -1,181 +1,231 @@
-hash: 9caa811ecaeb7e098da7a4f96eb4a9b165e1b838ccb46bfedda5be101463fe19
-updated: 2017-07-04T21:38:53.702169738Z
-imports:
-- name: github.com/afex/hystrix-go
-  version: 39520ddd07a9d9a071d615f7476798659f5a3b89
-  subpackages:
-  - hystrix
-  - hystrix/metric_collector
-  - hystrix/rolling
-- name: github.com/apache/thrift
-  version: 5b4c6bfc627ddbd56d1e98d4b818bec8cd8a5efd
-  subpackages:
-  - lib/go/thrift
-- name: github.com/beorn7/perks
-  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
-  subpackages:
-  - quantile
-- name: github.com/davecgh/go-spew
-  version: 782f4967f2dc4564575ca782fe2d04090b5faca8
-  subpackages:
-  - spew
-- name: github.com/eapache/go-resiliency
-  version: b1fe83b5b03f624450823b751b662259ffc6af70
-  subpackages:
-  - breaker
-- name: github.com/eapache/go-xerial-snappy
-  version: bb955e01b9346ac19dc29eb16586c90ded99a98c
-- name: github.com/eapache/queue
-  version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
-- name: github.com/go-kit/kit
-  version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
-  subpackages:
-  - circuitbreaker
-  - endpoint
-  - examples/addsvc
-  - examples/addsvc/client/grpc
-  - examples/addsvc/client/http
-  - examples/addsvc/pb
-  - examples/addsvc/thrift/gen-go/addsvc
-  - log
-  - log/term
-  - metrics
-  - metrics/internal/lv
-  - metrics/prometheus
-  - ratelimit
-  - tracing/opentracing
-  - transport/grpc
-  - transport/http
-- name: github.com/go-logfmt/logfmt
-  version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
-- name: github.com/go-stack/stack
-  version: 7a2f19628aabfe68f0766b59e74d6315f8347d22
-- name: github.com/gogo/protobuf
-  version: dda3e8acadcc9affc16faf33fbb229db78399245
-  subpackages:
-  - io
-  - proto
-- name: github.com/golang/protobuf
-  version: 6a1fa9404c0aebf36c879bc50152edcc953910d2
-  subpackages:
-  - proto
-  - ptypes/any
-  - ptypes/timestamp
-- name: github.com/golang/snappy
-  version: 553a641470496b2327abcac10b36396bd98e45c9
-- name: github.com/juju/ratelimit
-  version: 5b9ff866471762aa2ab2dced63c9fb6f53921342
-- name: github.com/kr/logfmt
-  version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
-- name: github.com/lightstep/lightstep-tracer-go
-  version: d9d2a958da1b2b4dd282e7685261942e20abd49c
-  subpackages:
-  - basictracer
-  - collectorpb
-  - lightstep_thrift
-  - lightsteppb
-  - thrift_0_9_2/lib/go/thrift
-  - thrift_rpc
-- name: github.com/matttproud/golang_protobuf_extensions
-  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
-  subpackages:
-  - pbutil
-- name: github.com/newtonsystems/grpc_types
-  version: 35d85c148c294797f8c2050489a7d76f07aa11a1
-  subpackages:
-  - go/grpc_types
-- name: github.com/opentracing/basictracer-go
-  version: 1b32af207119a14b1b231d451df3ed04a72efebf
-  subpackages:
-  - wire
-- name: github.com/opentracing/opentracing-go
-  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
-  subpackages:
-  - ext
-  - log
-- name: github.com/openzipkin/zipkin-go-opentracing
-  version: d88c90182f3fb514be54a1c7adc11a04d41c7da9
-  subpackages:
-  - _thrift/gen-go/scribe
-  - _thrift/gen-go/zipkincore
-  - flag
-  - types
-  - wire
-- name: github.com/pierrec/lz4
-  version: 5a3d2245f97fc249850e7802e3c01fad02a1c316
-- name: github.com/pierrec/xxHash
-  version: 5a004441f897722c627870a981d02b29924215fa
-  subpackages:
-  - xxHash32
-- name: github.com/prometheus/client_golang
-  version: c5b7fccd204277076155f10851dad72b76a49317
-  subpackages:
-  - prometheus
-  - prometheus/promhttp
-- name: github.com/prometheus/client_model
-  version: 6f3806018612930941127f2a7c6c453ba2c527d2
-  subpackages:
-  - go
-- name: github.com/prometheus/common
-  version: 0866df4b85a18d652b6965be022d007cdf076822
-  subpackages:
-  - expfmt
-  - internal/bitbucket.org/ww/goautoneg
-  - model
-- name: github.com/prometheus/procfs
-  version: e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2
-  subpackages:
-  - xfs
-- name: github.com/rcrowley/go-metrics
-  version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
-- name: github.com/Shopify/sarama
-  version: 2fd980e23bdcbb8edeb78fc704de0c39a6567ffc
-- name: github.com/sony/gobreaker
-  version: e9556a45379ef1da12e54847edb2fb3d7d566f36
-- name: github.com/streadway/handy
-  version: f450267a206e480d863d2a92846a40f6e2896b2a
-  subpackages:
-  - breaker
-- name: golang.org/x/net
-  version: 1f9224279e98554b6a6432d4dd998a739f8b2b7c
-  subpackages:
-  - context
-  - http2
-  - http2/hpack
-  - idna
-  - internal/timeseries
-  - lex/httplex
-  - trace
-- name: golang.org/x/text
-  version: 2bf8f2a19ec09c670e931282edfe6567f6be21c9
-  subpackages:
-  - secure/bidirule
-  - transform
-  - unicode/bidi
-  - unicode/norm
-- name: google.golang.org/genproto
-  version: aa2eb687b4d3e17154372564ad8d6bf11c3cf21f
-  subpackages:
-  - googleapis/rpc/status
-- name: google.golang.org/grpc
-  version: b15215fb911b24a5d61d57feec4233d610530464
-  subpackages:
-  - codes
-  - credentials
-  - grpclb/grpc_lb_v1
-  - grpclog
-  - internal
-  - keepalive
-  - metadata
-  - naming
-  - peer
-  - stats
-  - status
-  - tap
-  - transport
-- name: sourcegraph.com/sourcegraph/appdash
-  version: 5b9b70908c0e32b53e17215ee6e9515b02ad08b2
-  subpackages:
-  - internal/wire
-  - opentracing
-testImports: []
+# This file is autogenerated, do not edit; changes may be undone by the next 'dep ensure'.
+
+
+[[projects]]
+  name = "github.com/Shopify/sarama"
+  packages = ["."]
+  revision = "bbdbe644099b7fdc8327d5cc69c030945188b2e9"
+  version = "v1.13.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/afex/hystrix-go"
+  packages = ["hystrix","hystrix/metric_collector","hystrix/rolling"]
+  revision = "f118cd938f786d24f46cc307981d8f63b7951020"
+
+[[projects]]
+  name = "github.com/apache/thrift"
+  packages = ["lib/go/thrift"]
+  revision = "b2a4d4ae21c789b689dd162deb819665567f481c"
+  version = "0.10.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/beorn7/perks"
+  packages = ["quantile"]
+  revision = "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
+
+[[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/eapache/go-resiliency"
+  packages = ["breaker"]
+  revision = "6800482f2c813e689c88b7ed3282262385011890"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/eapache/go-xerial-snappy"
+  packages = ["."]
+  revision = "bb955e01b9346ac19dc29eb16586c90ded99a98c"
+
+[[projects]]
+  name = "github.com/eapache/queue"
+  packages = ["."]
+  revision = "ded5959c0d4e360646dc9e9908cff48666781367"
+  version = "v1.0.2"
+
+[[projects]]
+  name = "github.com/go-kit/kit"
+  packages = ["circuitbreaker","endpoint","examples/addsvc","examples/addsvc/client/grpc","examples/addsvc/client/http","examples/addsvc/pb","examples/addsvc/thrift/gen-go/addsvc","log","log/term","metrics","metrics/internal/lv","metrics/prometheus","ratelimit","tracing/opentracing","transport/grpc","transport/http"]
+  revision = "a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b"
+  version = "v0.5.0"
+
+[[projects]]
+  name = "github.com/go-logfmt/logfmt"
+  packages = ["."]
+  revision = "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
+  version = "v0.3.0"
+
+[[projects]]
+  name = "github.com/go-stack/stack"
+  packages = ["."]
+  revision = "817915b46b97fd7bb80e8ab6b69f01a53ac3eebf"
+  version = "v1.6.0"
+
+[[projects]]
+  name = "github.com/gogo/protobuf"
+  packages = ["io","proto"]
+  revision = "342cbe0a04158f6dcb03ca0079991a51a4248c02"
+  version = "v0.5"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/protobuf"
+  packages = ["proto","ptypes","ptypes/any","ptypes/duration","ptypes/timestamp"]
+  revision = "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  revision = "553a641470496b2327abcac10b36396bd98e45c9"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/juju/ratelimit"
+  packages = ["."]
+  revision = "59fac5042749a5afb9af70e813da1dd5474f0167"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kr/logfmt"
+  packages = ["."]
+  revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
+
+[[projects]]
+  name = "github.com/lightstep/lightstep-tracer-go"
+  packages = [".","collectorpb","lightstep_thrift","lightsteppb","thrift_0_9_2/lib/go/thrift"]
+  revision = "8ea6e2a40aeb49f0a846212f919d156082f58e16"
+  version = "v0.14.0"
+
+[[projects]]
+  name = "github.com/matttproud/golang_protobuf_extensions"
+  packages = ["pbutil"]
+  revision = "3247c84500bff8d9fb6d579d800f20b3e091582c"
+  version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/newtonsystems/grpc_types"
+  packages = ["go/grpc_types"]
+  revision = "de0b9e15807374256dc50abf1aae1a7a08b10396"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/opentracing-contrib/go-observer"
+  packages = ["."]
+  revision = "a52f2342449246d5bcc273e65cbdcfa5f7d6c63c"
+
+[[projects]]
+  name = "github.com/opentracing/basictracer-go"
+  packages = [".","wire"]
+  revision = "1b32af207119a14b1b231d451df3ed04a72efebf"
+  version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/opentracing/opentracing-go"
+  packages = [".","ext","log"]
+  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
+  version = "v1.0.2"
+
+[[projects]]
+  name = "github.com/openzipkin/zipkin-go-opentracing"
+  packages = [".","flag","thrift/gen-go/scribe","thrift/gen-go/zipkincore","types","wire"]
+  revision = "9c88fa03bfdfaa5fec7cd1b40f3d10ec15c15fc6"
+  version = "v0.3.1"
+
+[[projects]]
+  name = "github.com/pierrec/lz4"
+  packages = ["."]
+  revision = "08c27939df1bd95e881e2c2367a749964ad1fceb"
+  version = "v1.0.1"
+
+[[projects]]
+  name = "github.com/pierrec/xxHash"
+  packages = ["xxHash32"]
+  revision = "f051bb7f1d1aaf1b5a665d74fb6b0217712c69f7"
+  version = "v0.1.1"
+
+[[projects]]
+  name = "github.com/prometheus/client_golang"
+  packages = ["prometheus","prometheus/promhttp"]
+  revision = "c5b7fccd204277076155f10851dad72b76a49317"
+  version = "v0.8.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/prometheus/client_model"
+  packages = ["go"]
+  revision = "6f3806018612930941127f2a7c6c453ba2c527d2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/prometheus/common"
+  packages = ["expfmt","internal/bitbucket.org/ww/goautoneg","model"]
+  revision = "e3fb1a1acd7605367a2b378bc2e2f893c05174b7"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/prometheus/procfs"
+  packages = [".","xfs"]
+  revision = "a6e9df898b1336106c743392c48ee0b71f5c4efa"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/rcrowley/go-metrics"
+  packages = ["."]
+  revision = "1f30fe9094a513ce4c700b9a54458bbb0c96996c"
+
+[[projects]]
+  name = "github.com/sony/gobreaker"
+  packages = ["."]
+  revision = "e9556a45379ef1da12e54847edb2fb3d7d566f36"
+  version = "0.3.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/streadway/handy"
+  packages = ["breaker"]
+  revision = "f450267a206e480d863d2a92846a40f6e2896b2a"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context","http2","http2/hpack","idna","internal/timeseries","lex/httplex","trace"]
+  revision = "a337091b0525af65de94df2eb7e98bd9962dcbe2"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/text"
+  packages = ["collate","collate/build","internal/colltab","internal/gen","internal/tag","internal/triegen","internal/ucd","language","secure/bidirule","transform","unicode/bidi","unicode/cldr","unicode/norm","unicode/rangetable"]
+  revision = "88f656faf3f37f690df1a32515b479415e1a6769"
+
+[[projects]]
+  branch = "master"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/rpc/status"]
+  revision = "11c7f9e547da6db876260ce49ea7536985904c9b"
+
+[[projects]]
+  name = "google.golang.org/grpc"
+  packages = [".","balancer","codes","connectivity","credentials","grpclb/grpc_lb_v1/messages","grpclog","internal","keepalive","metadata","naming","peer","resolver","stats","status","tap","transport"]
+  revision = "5ffe3083946d5603a0578721101dc8165b1d5b5f"
+  version = "v1.7.2"
+
+[[projects]]
+  branch = "master"
+  name = "sourcegraph.com/sourcegraph/appdash"
+  packages = [".","internal/wire","opentracing"]
+  revision = "f9a4336c02542ebbfa01c37949bd7152fb0f659c"
+
+[solve-meta]
+  analyzer-name = "dep"
+  analyzer-version = 1
+  inputs-digest = "17a1b5f7e91b2994824b33f69dd1abbe21449995d9050ccbc99d05e6e2a446a7"
+  solver-name = "gps-cdcl"
+  solver-version = 1
