@@ -30,7 +30,7 @@ func MakeDebugHTTPHandler(endpoints Endpoints, tracer stdopentracing.Tracer, log
 		endpoints.SayHelloEndpoint,
 		DecodeHTTPSayHelloRequest,
 		EncodeHTTPGenericResponse,
-		append(options, httptransport.ServerBefore(httptransport.PopulateRequestContext), httptransport.ServerBefore(opentracing.FromHTTPRequest(tracer, "SayHello", logger)))...,
+		append(options, httptransport.ServerBefore(httptransport.PopulateRequestContext), httptransport.ServerBefore(opentracing.HTTPToContext(tracer, "SayHello", logger)))...,
 	))
 
 	return m

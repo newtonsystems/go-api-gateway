@@ -1,4 +1,4 @@
-﻿package main
+package main
 
 import (
 	//"context"
@@ -10,7 +10,6 @@ import (
 	"net/http/pprof"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -19,7 +18,7 @@ import (
 	"github.com/go-kit/kit/log/term"
 	lightstep "github.com/lightstep/lightstep-tracer-go"
 	stdopentracing "github.com/opentracing/opentracing-go"
-	zipkin "github.com/openzipkin/zipkin-go-opentracing"
+	//zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
@@ -40,6 +39,10 @@ import (
 	"github.com/newtonsystems/grpc_types/go/grpc_types"
 )
 
+const (
+	defaultLinkerdHost = "linkerd:4141"
+)
+
 var ColourKeys = func(keyvals ...interface{}) term.FgBgColor {
 	for _, item := range keyvals {
 		if item == "msg.ERROR" {
@@ -52,10 +55,20 @@ var ColourKeys = func(keyvals ...interface{}) term.FgBgColor {
 	return term.FgBgColor{}
 }
 
+func envString(env, fallback string) string {
+	e := os.Getenv(env)
+	if e == "" {
+		return fallback
+	}
+	return e
+}
+
 func main() {
 
 	var (
-		debugAddr = flag.String("debug.addr", ":8080", "Debug and metrics listen address")
+		debugAddr = flag.String("debug.addr", ":9090", "Debug and metrics listen address")
+		localConn = flag.Bool("conn.local", false, "Override linkerd connection")
+
 		//httpAddr  = flag.String("http.addr", ":8081", "HTTP listen address")
 		//grpcAddr  = flag.String("grpc.addr", ":8042", "gRPC (HTTP) listen address")
 
@@ -75,6 +88,9 @@ func main() {
 		// Debug only (Should NEVER be used in production)
 		httpAnyServiceAddr = flag.String("debug.httpanyservice.addr", ":9001", "HTTP listen address for accessing any service")
 		gRPCAnyServiceAddr = flag.String("debug.grpcanyservice.addr", ":9002", "gRPC (HTTP) listen address for accessing any service")
+
+		// other
+		l5dConn *grpc.ClientConn
 	)
 	flag.Parse()
 
@@ -145,45 +161,45 @@ func main() {
 	var tracer stdopentracing.Tracer
 	{
 		if *zipkinAddr != "" {
-			logger := log.With(logger, "tracer", "ZipkinHTTP")
-			logger.Log("addr", *zipkinAddr)
-
-			// endpoint typically looks like: http://zipkinhost:9411/api/v1/spans
-			collector, err := zipkin.NewHTTPCollector(*zipkinAddr)
-			if err != nil {
-				logger.Log("err", err)
-				os.Exit(1)
-			}
-			defer collector.Close()
-
-			tracer, err = zipkin.NewTracer(
-				zipkin.NewRecorder(collector, false, "localhost:80", "addsvc"),
-			)
-			if err != nil {
-				logger.Log("err", err)
-				os.Exit(1)
-			}
+			// logger := log.With(logger, "tracer", "ZipkinHTTP")
+			// logger.Log("addr", *zipkinAddr)
+			//
+			// // endpoint typically looks like: http://zipkinhost:9411/api/v1/spans
+			// collector, err := zipkin.NewHTTPCollector(*zipkinAddr)
+			// if err != nil {
+			// 	logger.Log("err", err)
+			// 	os.Exit(1)
+			// }
+			// defer collector.Close()
+			//
+			// tracer, err = zipkin.NewTracer(
+			// 	zipkin.NewRecorder(collector, false, "localhost:80", "addsvc"),
+			// )
+			// if err != nil {
+			// 	logger.Log("err", err)
+			// 	os.Exit(1)
+			// }
 		} else if *zipkinKafkaAddr != "" {
 			logger := log.With(logger, "tracer", "ZipkinKafka")
 			logger.Log("addr", *zipkinKafkaAddr)
-
-			collector, err := zipkin.NewKafkaCollector(
-				strings.Split(*zipkinKafkaAddr, ","),
-				zipkin.KafkaLogger(log.NewNopLogger()),
-			)
-			if err != nil {
-				logger.Log("err", err)
-				os.Exit(1)
-			}
-			defer collector.Close()
-
-			tracer, err = zipkin.NewTracer(
-				zipkin.NewRecorder(collector, false, "localhost:80", "addsvc"),
-			)
-			if err != nil {
-				logger.Log("err", err)
-				os.Exit(1)
-			}
+			//
+			// collector, err := zipkin.NewKafkaCollector(
+			// 	strings.Split(*zipkinKafkaAddr, ","),
+			// 	zipkin.KafkaLogger(log.NewNopLogger()),
+			// )
+			// if err != nil {
+			// 	logger.Log("err", err)
+			// 	os.Exit(1)
+			// }
+			// defer collector.Close()
+			//
+			// tracer, err = zipkin.NewTracer(
+			// 	zipkin.NewRecorder(collector, false, "localhost:80", "addsvc"),
+			// )
+			// if err != nil {
+			// 	logger.Log("err", err)
+			// 	os.Exit(1)
+			// }
 		} else if *appdashAddr != "" {
 			logger := log.With(logger, "tracer", "Appdash")
 			logger.Log("addr", *appdashAddr)
@@ -208,20 +224,46 @@ func main() {
 	errc := make(chan error)
 	//ctx := context.Background()
 
-	conn, err := grpc.Dial("192.168.99.100:31000", grpc.WithInsecure(), grpc.WithTimeout(time.Second))
-	if err != nil {
-		logger.Log("msg", "Failed to connect to linkerd", "level", "crit")
-		errc <- err
+	// ---------------------------------------------------------------------------
+
+	// Get linker host
+
+	var l5dHost string
+
+	// Work out which linkerd host to connect to depending on environment variables
+	// or command flags
+	if *localConn {
+		l5dHost = envString("LINKERD_SERVICE_HOST", "192.168.99.100") + ":" + envString("LINKERD_SERVICE_PORT", "31000")
+	} else {
+		l5dHost = defaultLinkerdHost
+	}
+
+	// Connect to local linkerd
+
+	// Linkerd logger
+	l5dLogger := log.With(logger, "connection", "linkerd")
+
+	// If address is incorrect retries forever at the moment
+	// https://github.com/grpc/grpc-go/issues/133
+	var errL5d error
+	l5dConn, errL5d = grpc.Dial(l5dHost, grpc.WithInsecure(), grpc.WithTimeout(time.Second))
+	if errL5d != nil {
+		l5dLogger.Log("msg", "Failed to connect to local linkerd", "level", "crit")
+		errc <- errL5d
 		return
 	}
-	defer conn.Close()
+	defer l5dConn.Close()
+
+	l5dLogger.Log("host", l5dHost, "msg", "successfully connected")
+
+	// ---------------------------------------------------------------------------
 
 	var sayHelloEndpoint endpoint.Endpoint
 	{
 		sayHelloDuration := duration.With("method", "SayHello")
 		sayHelloLogger := log.With(logger, "method", "SayHello")
 
-		sayHelloEndpoint = addsvc.MakeSayHelloEndpoint(conn)
+		sayHelloEndpoint = addsvc.MakeSayHelloEndpoint(l5dConn)
 		sayHelloEndpoint = opentracing.TraceServer(tracer, "SayHello")(sayHelloEndpoint)
 		sayHelloEndpoint = addsvc.EndpointInstrumentingMiddleware(sayHelloDuration)(sayHelloEndpoint)
 		sayHelloEndpoint = addsvc.EndpointLoggingMiddleware(sayHelloLogger)(sayHelloEndpoint)
@@ -286,31 +328,32 @@ func main() {
 
 		// HTTP transport for access to any internal service
 		go func() {
-			//logger := log.With(logger, "msg", "Debug Any Service", "transport", "HTTP")
-			logger := log.With(logger, "tag", "#debughttp")
-			h2 := addsvc.MakeDebugHTTPHandler(endpoints, tracer, logger)
-			logger.Log("addr", *httpAnyServiceAddr, "tag", "#setup")
-			errc <- http.ListenAndServe(*httpAnyServiceAddr, h2)
+			httpLogger := log.With(logger, "level", "info", "tag", "#debughttp", "transport", "http", "msg", "Debug Any service")
+			debugHTTPHandler := addsvc.MakeDebugHTTPHandler(endpoints, tracer, httpLogger)
+			httpLogger.Log("addr", *httpAnyServiceAddr, "tag", "#setup")
+
+			errc <- http.ListenAndServe(*httpAnyServiceAddr, debugHTTPHandler)
 		}()
 
 		// gRPC transport for access to any gRPC service.
 		go func() {
-			logger := log.With(logger, "msg", "Debug Any Service", "transport", "gRPC")
+			grpcLogger := log.With(logger, "level", "info", "tag", "#debughttp", "transport", "gRPC", "msg", "Debug Any service")
 
 			ln, err := net.Listen("tcp", *gRPCAnyServiceAddr)
 			if err != nil {
 				errc <- err
 				return
 			}
+			defer ln.Close()
 
-			srv2 := addsvc.MakeAllServicesGRPCServer(endpoints, tracer, logger)
-			s2 := grpc.NewServer()
-			//pb.RegisterAddServer(s, srv)
-			grpc_types.RegisterHelloServer(s2, srv2)
-			grpc_types.RegisterWorldServer(s2, srv2)
+			srvDebugAll := addsvc.MakeAllServicesGRPCServer(endpoints, tracer, grpcLogger)
+			sDebugAll := grpc.NewServer()
+			grpc_types.RegisterHelloServer(sDebugAll, srvDebugAll)
+			grpc_types.RegisterWorldServer(sDebugAll, srvDebugAll)
+			defer sDebugAll.GracefulStop()
 
-			logger.Log("addr", *gRPCAnyServiceAddr)
-			errc <- s2.Serve(ln)
+			grpcLogger.Log("addr", *gRPCAnyServiceAddr, "tag", "#setup")
+			errc <- sDebugAll.Serve(ln)
 		}()
 	}
 

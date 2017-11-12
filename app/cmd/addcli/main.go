@@ -12,7 +12,7 @@ import (
 	//	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/lightstep/lightstep-tracer-go"
 	stdopentracing "github.com/opentracing/opentracing-go"
-	zipkin "github.com/openzipkin/zipkin-go-opentracing"
+	//zipkin "github.com/openzipkin/zipkin-go-opentracing"
 	"google.golang.org/grpc"
 	"sourcegraph.com/sourcegraph/appdash"
 	appdashot "sourcegraph.com/sourcegraph/appdash/opentracing"
@@ -57,21 +57,21 @@ func main() {
 	var tracer stdopentracing.Tracer
 	{
 		if *zipkinAddr != "" {
-			// endpoint typically looks like: http://zipkinhost:9411/api/v1/spans
-			collector, err := zipkin.NewHTTPCollector(*zipkinAddr)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				os.Exit(1)
-			}
-			defer collector.Close()
-
-			tracer, err = zipkin.NewTracer(
-				zipkin.NewRecorder(collector, false, "0.0.0.0:0", "addcli"),
-			)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				os.Exit(1)
-			}
+			// // endpoint typically looks like: http://zipkinhost:9411/api/v1/spans
+			// collector, err := zipkin.NewHTTPCollector(*zipkinAddr)
+			// if err != nil {
+			// 	fmt.Fprintf(os.Stderr, "%v\n", err)
+			// 	os.Exit(1)
+			// }
+			// defer collector.Close()
+			//
+			// tracer, err = zipkin.NewTracer(
+			// 	zipkin.NewRecorder(collector, false, "0.0.0.0:0", "addcli"),
+			// )
+			// if err != nil {
+			// 	fmt.Fprintf(os.Stderr, "%v\n", err)
+			// 	os.Exit(1)
+			// }
 		} else if *zipkinKafkaAddr != "" {
 			collector, err := zipkin.NewKafkaCollector(
 				strings.Split(*zipkinKafkaAddr, ","),
