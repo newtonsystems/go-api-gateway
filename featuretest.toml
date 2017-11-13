@@ -23,44 +23,8 @@
 
 [[constraint]]
   name = "github.com/go-kit/kit"
-  version = "0.5.0"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/juju/ratelimit"
-
-[[constraint]]
-  name = "github.com/lightstep/lightstep-tracer-go"
-  version = "0.14.0"
+  version = "0.6.0"
 
 [[constraint]]
   branch = "master"
   name = "github.com/newtonsystems/grpc_types"
-
-[[constraint]]
-  name = "github.com/opentracing/opentracing-go"
-  version = "1.0.2"
-
-[[constraint]]
-  name = "github.com/openzipkin/zipkin-go-opentracing"
-  version = "0.3.1"
-
-[[constraint]]
-  name = "github.com/prometheus/client_golang"
-  version = "0.8.0"
-
-[[constraint]]
-  name = "github.com/sony/gobreaker"
-  version = "0.3.0"
-
-[[constraint]]
-  branch = "master"
-  name = "golang.org/x/net"
-
-[[constraint]]
-  name = "google.golang.org/grpc"
-  version = "1.7.2"
-
-[[constraint]]
-  branch = "master"
-  name = "sourcegraph.com/sourcegraph/appdash"

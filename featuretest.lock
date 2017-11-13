@@ -2,58 +2,16 @@
 
 
 [[projects]]
-  name = "github.com/Shopify/sarama"
-  packages = ["."]
-  revision = "bbdbe644099b7fdc8327d5cc69c030945188b2e9"
-  version = "v1.13.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/afex/hystrix-go"
-  packages = ["hystrix","hystrix/metric_collector","hystrix/rolling"]
-  revision = "f118cd938f786d24f46cc307981d8f63b7951020"
-
-[[projects]]
-  name = "github.com/apache/thrift"
-  packages = ["lib/go/thrift"]
-  revision = "b2a4d4ae21c789b689dd162deb819665567f481c"
-  version = "0.10.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/beorn7/perks"
   packages = ["quantile"]
   revision = "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
 
 [[projects]]
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
-  version = "v1.1.0"
-
-[[projects]]
-  name = "github.com/eapache/go-resiliency"
-  packages = ["breaker"]
-  revision = "6800482f2c813e689c88b7ed3282262385011890"
-  version = "v1.0.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/eapache/go-xerial-snappy"
-  packages = ["."]
-  revision = "bb955e01b9346ac19dc29eb16586c90ded99a98c"
-
-[[projects]]
-  name = "github.com/eapache/queue"
-  packages = ["."]
-  revision = "ded5959c0d4e360646dc9e9908cff48666781367"
-  version = "v1.0.2"
-
-[[projects]]
   name = "github.com/go-kit/kit"
-  packages = ["circuitbreaker","endpoint","examples/addsvc","examples/addsvc/client/grpc","examples/addsvc/client/http","examples/addsvc/pb","examples/addsvc/thrift/gen-go/addsvc","log","log/term","metrics","metrics/internal/lv","metrics/prometheus","ratelimit","tracing/opentracing","transport/grpc","transport/http"]
-  revision = "a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b"
-  version = "v0.5.0"
+  packages = ["endpoint","log","log/term","metrics","metrics/internal/lv","metrics/prometheus","tracing/opentracing","transport/grpc","transport/http"]
+  revision = "4dc7be5d2d12881735283bcab7352178e190fc71"
+  version = "v0.6.0"
 
 [[projects]]
   name = "github.com/go-logfmt/logfmt"
@@ -64,8 +22,8 @@
 [[projects]]
   name = "github.com/go-stack/stack"
   packages = ["."]
-  revision = "817915b46b97fd7bb80e8ab6b69f01a53ac3eebf"
-  version = "v1.6.0"
+  revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
+  version = "v1.7.0"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -78,18 +36,6 @@
   name = "github.com/golang/protobuf"
   packages = ["proto","ptypes","ptypes/any","ptypes/duration","ptypes/timestamp"]
   revision = "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/golang/snappy"
-  packages = ["."]
-  revision = "553a641470496b2327abcac10b36396bd98e45c9"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/juju/ratelimit"
-  packages = ["."]
-  revision = "59fac5042749a5afb9af70e813da1dd5474f0167"
 
 [[projects]]
   branch = "master"
@@ -116,12 +62,6 @@
   revision = "de0b9e15807374256dc50abf1aae1a7a08b10396"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/opentracing-contrib/go-observer"
-  packages = ["."]
-  revision = "a52f2342449246d5bcc273e65cbdcfa5f7d6c63c"
-
-[[projects]]
   name = "github.com/opentracing/basictracer-go"
   packages = [".","wire"]
   revision = "1b32af207119a14b1b231d451df3ed04a72efebf"
@@ -132,24 +72,6 @@
   packages = [".","ext","log"]
   revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
   version = "v1.0.2"
-
-[[projects]]
-  name = "github.com/openzipkin/zipkin-go-opentracing"
-  packages = [".","flag","thrift/gen-go/scribe","thrift/gen-go/zipkincore","types","wire"]
-  revision = "9c88fa03bfdfaa5fec7cd1b40f3d10ec15c15fc6"
-  version = "v0.3.1"
-
-[[projects]]
-  name = "github.com/pierrec/lz4"
-  packages = ["."]
-  revision = "08c27939df1bd95e881e2c2367a749964ad1fceb"
-  version = "v1.0.1"
-
-[[projects]]
-  name = "github.com/pierrec/xxHash"
-  packages = ["xxHash32"]
-  revision = "f051bb7f1d1aaf1b5a665d74fb6b0217712c69f7"
-  version = "v0.1.1"
 
 [[projects]]
   name = "github.com/prometheus/client_golang"
@@ -174,24 +96,6 @@
   name = "github.com/prometheus/procfs"
   packages = [".","xfs"]
   revision = "a6e9df898b1336106c743392c48ee0b71f5c4efa"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/rcrowley/go-metrics"
-  packages = ["."]
-  revision = "1f30fe9094a513ce4c700b9a54458bbb0c96996c"
-
-[[projects]]
-  name = "github.com/sony/gobreaker"
-  packages = ["."]
-  revision = "e9556a45379ef1da12e54847edb2fb3d7d566f36"
-  version = "0.3.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/streadway/handy"
-  packages = ["breaker"]
-  revision = "f450267a206e480d863d2a92846a40f6e2896b2a"
 
 [[projects]]
   branch = "master"
@@ -226,6 +130,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "17a1b5f7e91b2994824b33f69dd1abbe21449995d9050ccbc99d05e6e2a446a7"
+  inputs-digest = "69ec5b7fb800d16d82db65e67ef45cdb82146a829411cb3bff95b9e3c76e7a7e"
   solver-name = "gps-cdcl"
   solver-version = 1
